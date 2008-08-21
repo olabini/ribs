@@ -11,6 +11,7 @@ require 'hibernate3.jar'
 
 require 'ribs/db'
 require 'ribs/session'
+require 'ribs/core_ext/time'
 
 module Ribs
   class << self

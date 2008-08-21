@@ -12,6 +12,15 @@ describe "Simple select" do
     end
   end
 
-  it "should return correct data for times"
-  it "should return correct data for dates"
+  it "should return correct data for times" do 
+    Ribs.with_session do |s|
+      s.select("SELECT playTime FROM DB_TRACK").should == [[Time.time_at(14,50,0)], [Time.time_at(16,23,0)]]
+    end
+  end
+
+  it "should return correct data for dates" do 
+    Ribs.with_session do |s|
+      s.select("SELECT added FROM DB_TRACK").should == [[Time.local(1984, 12, 13, 0, 0, 0)], [Time.local(1983, 12, 13, 0, 0, 0)]]
+    end
+  end
 end

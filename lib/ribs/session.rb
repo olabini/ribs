@@ -60,7 +60,7 @@ module Ribs
       while rs.next
         row = []
         (1..cols).each do |n|
-          row << rs.get_object(n)
+          row << from_database_type(rs.get_object(n))
         end
         result << row
       end
@@ -73,6 +73,15 @@ module Ribs
     private
     def chk_conn
       raise NotConnectedError unless @connected
+    end
+    
+    def from_database_type(obj)
+      case obj
+      when String, Integer, NilClass
+        obj
+      when java.sql.Date, java.sql.Time, java.sql.Timestamp
+        Time.at(obj.time/1000)
+      end
     end
     
     def set_prepared_statement(stmt, item, index)
@@ -89,9 +98,13 @@ module Ribs
         stmt.set_float index, item
       when Time
         begin
-          stmt.set_date index, java.sql.Date.new(item.to_i)
+          stmt.set_date index, item.to_java_sql_date
         rescue
-          stmt.set_time index, java.sql.Time.new(item.to_i)
+          begin
+            stmt.set_time_stamp index, item.to_java_sql_time_stamp
+          rescue
+            stmt.set_time index, item.to_java_sql_time
+          end
         end
       when TrueClass, FalseClass
         stmt.set_boolean index, item
