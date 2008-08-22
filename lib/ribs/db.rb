@@ -14,8 +14,7 @@ module Ribs
         register db
 
         db.create
-        db.freeze
-        
+
         db
       end
       
@@ -51,6 +50,7 @@ module Ribs
     attr_accessor :password
     attr_accessor :properties
     attr_accessor :default
+    attr_reader :mappings
     
     def initialize(name = :main)
       self.name = name
@@ -71,7 +71,13 @@ module Ribs
       self.properties.each do |key, value|
         properties.set_property(key, value)
       end
-      @session_factory = Configuration.new.add_properties(properties).build_session_factory
+      @configuration = Configuration.new.add_properties(properties)
+      @mappings = @configuration.create_mappings
+      reset_session_factory!
+    end
+
+    def reset_session_factory!
+      @session_factory = @configuration.build_session_factory
     end
     
     def session
@@ -88,7 +94,7 @@ module Ribs
     
     def release(session)
       res = Thread.current[:ribs_db_sessions][self.object_id]
-      if res[0] == session
+      if res[0] == session.hibernate_session
         res[1] -= 1
         if res[1] == 0
           res[0].close

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<project basedir="." default="jar" name="ribs">
+  <path id="build.classpath">
+    <fileset dir="lib" includes="*.jar" excludes="ribs*.jar"/>
+  </path>
+
+  <patternset id="java.src.pattern">
+    <include name="**/*.java"/>
+  </patternset>
+
+  <target name="prepare" description="Creates the directories needed for building">
+    <mkdir dir="build/classes"/>
+  </target>
+  
+  <target name="compile" depends="prepare" description="Compile the source files for the project.">
+    <javac destdir="build/classes" debug="true" source="1.5" target="1.5">
+      <classpath refid="build.classpath"/>
+      <src path="src/java"/>
+      <patternset refid="java.src.pattern"/>
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile" description="Create the ribs.jar file">
+    <jar destfile="lib/ribs.jar">
+      <fileset dir="build/classes">
+        <include name="**/*.class"/>
+        <include name="**/*.properties"/>
+      </fileset>
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="clean" depends="prepare" description="clean almost everything">
+    <delete dir="build/classes"/>
+    <delete file="lib/ribs.jar" quiet="true"/>
+  </target>
+</project>

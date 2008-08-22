@@ -8,9 +8,12 @@ require 'jta-1.1.jar'
 require 'slf4j-api-1.5.2.jar'
 require 'slf4j-jdk14-1.5.2.jar'
 require 'hibernate3.jar'
+require 'ribs.jar'
 
 require 'ribs/db'
+require 'ribs/definition'
 require 'ribs/session'
+require 'ribs/meat'
 require 'ribs/core_ext/time'
 
 module Ribs
@@ -21,5 +24,12 @@ module Ribs
     ensure
       s.release
     end
+  end
+end
+
+module Kernel
+  def Ribs!(options = {}, &block)
+    options.merge!({:on => self, :db => :default, :from => nil})
+    Ribs::define_ribs(options[:on], options, &block)
   end
 end

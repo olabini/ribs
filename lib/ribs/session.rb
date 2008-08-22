@@ -16,6 +16,8 @@ module Ribs
       end
     end
     
+    attr_reader :db
+    
     def initialize(db, hibernate_session)
       @db = db
       @connected = true
@@ -26,6 +28,28 @@ module Ribs
       chk_conn
       @connected = false
       @db.release(self)
+    end
+
+    # LOW LEVEL - shouldn't be used
+    def hibernate_session
+      @hibernate_session
+    end
+    
+    # LOW LEVEL - shouldn't be used
+    def find(entity_name, id)
+      chk_conn
+      case id
+      when :all
+        @hibernate_session.create_criteria(entity_name).list.to_a
+      else
+        @hibernate_session.get(entity_name, java.lang.Integer.new(id))
+      end
+    end
+
+    # LOW LEVEL - shouldn't be used
+    def meta_data
+      chk_conn
+      @hibernate_session.connection.meta_data
     end
     
     # LOW LEVEL - shouldn't be used
@@ -41,10 +65,15 @@ module Ribs
       stmt = conn.prepare_statement(template)
       data.each do |d|
         d.each_with_index do |item, index|
-          set_prepared_statement(stmt, item, index+1)
+          if item.kind_of?(Array)
+            set_prepared_statement(stmt, item[0], index+1, item[1])
+          else
+            set_prepared_statement(stmt, item, index+1, nil)
+          end
         end
         stmt.execute_update
       end
+      conn.commit
     ensure
       stmt.close rescue nil
     end
@@ -84,7 +113,7 @@ module Ribs
       end
     end
     
-    def set_prepared_statement(stmt, item, index)
+    def set_prepared_statement(stmt, item, index, type)
       case item
       when NilClass
         stmt.set_object index, nil
@@ -97,14 +126,13 @@ module Ribs
       when Float
         stmt.set_float index, item
       when Time
-        begin
+        case type
+        when :date
           stmt.set_date index, item.to_java_sql_date
-        rescue
-          begin
-            stmt.set_time_stamp index, item.to_java_sql_time_stamp
-          rescue
+        when :time
             stmt.set_time index, item.to_java_sql_time
-          end
+        when :times_stamp
+          stmt.set_time_stamp index, item.to_java_sql_time_stamp
         end
       when TrueClass, FalseClass
         stmt.set_boolean index, item
@@ -117,6 +145,7 @@ module Ribs
       conn = @hibernate_session.connection
       stmt = conn.create_statement
       stmt.execute_update(string)
+      conn.commit
     ensure
       stmt.close rescue nil
     end
