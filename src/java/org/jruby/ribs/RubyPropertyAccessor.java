@@ -31,7 +31,7 @@ public class RubyPropertyAccessor implements PropertyAccessor {
 		return new Getter() {
 			public Object get(Object owner) throws HibernateException {
 				Ruby runtime = null;
-				IRubyObject rubyValue = ((IRubyObject)owner).callMethod(runtime.getCurrentContext(),propertyName);
+				IRubyObject rubyValue = ((IRubyObject)owner).callMethod(runtime.getCurrentContext(),propertyName.toLowerCase());
 				if(rubyValue instanceof RubyTime) {
 					return ((RubyTime)rubyValue).getJavaDate();
 				} else if(isRubyProxy(rubyValue)) {
@@ -81,7 +81,7 @@ public class RubyPropertyAccessor implements PropertyAccessor {
 					rubyObject = JavaUtil.convertJavaToRuby(runtime, value);
 				}
 				
-				((IRubyObject)target).callMethod(runtime.getCurrentContext(),propertyName+"=",
+				((IRubyObject)target).callMethod(runtime.getCurrentContext(),propertyName.toLowerCase()+"=",
 						new IRubyObject[] {rubyObject});
 			}
 		};

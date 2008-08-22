@@ -101,12 +101,13 @@ module Ribs
     
     private
     def define_meat_accessor(clazz, name)
+      downcased = name.downcase
       clazz.class_eval <<CODE
-  def #{name}
+  def #{downcased}
     self.__ribs_meat[:"#{name}"]
   end
 
-  def #{name}=(value)
+  def #{downcased}=(value)
     self.__ribs_meat[:"#{name}"] = value
   end
 CODE

@@ -1,5 +1,11 @@
 require 'java'
 
+# Force logging to a lower level
+lm = java.util.logging.LogManager.log_manager
+lm.logger_names.each do |ln|
+  lm.get_logger(ln).set_level(java.util.logging.Level::SEVERE)
+end
+
 require 'antlr-2.7.6.jar'
 require 'commons-collections-3.1.jar'
 require 'dom4j-1.6.1.jar'
@@ -29,7 +35,8 @@ end
 
 module Kernel
   def Ribs!(options = {}, &block)
-    options.merge!({:on => self, :db => :default, :from => nil})
-    Ribs::define_ribs(options[:on], options, &block)
+    default = {:on => self, :db => :default, :from => nil}
+    default.merge! options
+    Ribs::define_ribs(default[:on], default, &block)
   end
 end

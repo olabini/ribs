@@ -10,10 +10,10 @@ describe Artist do
   end
 
   it "should return correct value and type for id property" do 
-    Artist.find(:all).map { |a| a.ID }.sort.should == [1,2,3]
+    Artist.find(:all).map { |a| a.id }.sort.should == [1,2,3]
   end
   
   it "should return correct value and type for name property" do 
-    Artist.find(:all).map { |a| a.NAME }.sort.should == ["David Bowie","New Model Army","Public Image Ltd"]
+    Artist.find(:all).map { |a| a.name }.sort.should == ["David Bowie","New Model Army","Public Image Ltd"]
   end
 end
