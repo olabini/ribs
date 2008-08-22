@@ -30,7 +30,7 @@ public class RubyPropertyAccessor implements PropertyAccessor {
 	public Getter getGetter(Class theClass, final String propertyName) throws PropertyNotFoundException {
 		return new Getter() {
 			public Object get(Object owner) throws HibernateException {
-				Ruby runtime = null;
+				Ruby runtime = ((IRubyObject)owner).getRuntime();
 				IRubyObject rubyValue = ((IRubyObject)owner).callMethod(runtime.getCurrentContext(),propertyName.toLowerCase());
 				if(rubyValue instanceof RubyTime) {
 					return ((RubyTime)rubyValue).getJavaDate();
@@ -55,7 +55,7 @@ public class RubyPropertyAccessor implements PropertyAccessor {
 
 			public Class getReturnType() {
 				return Object.class;
-			} 
+            } 
 		};
 	}
 
@@ -76,7 +76,7 @@ public class RubyPropertyAccessor implements PropertyAccessor {
 				IRubyObject rubyObject = null;
 				if(value instanceof java.util.Date) {
 					long milisecs = ((java.util.Date)value).getTime();
-					rubyObject = runtime.getClass("Time").newInstance(runtime.getCurrentContext(), new IRubyObject[]{runtime.newFixnum(milisecs)},Block.NULL_BLOCK);
+					rubyObject = RubyTime.newTime(runtime, milisecs);
 				} else {
 					rubyObject = JavaUtil.convertJavaToRuby(runtime, value);
 				}

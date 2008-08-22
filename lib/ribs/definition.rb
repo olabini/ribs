@@ -2,6 +2,45 @@ module Ribs
   class MetaData
     attr_accessor :table
     attr_accessor :persistent_class
+    attr_accessor :rib
+    
+    def [](name)
+#      $stderr.puts self.persistent_class.property_iterator.to_a.inspect
+      self.persistent_class.get_property(name.to_s) rescue nil
+    end
+
+    def properties
+      self.persistent_class.property_iterator.to_a.inject({}) do |h, value|
+        h[value.name] = value
+        h
+      end
+    end
+  end
+
+  class Rib
+    attr_accessor :table
+    attr_reader :columns
+    attr_reader :primary_keys
+    attr_reader :to_avoid
+
+    def initialize
+      @columns = { }
+      @primary_keys = { }
+      @to_avoid = []
+    end
+    
+    def col(column, property = column, options = {})
+      @columns[column.to_s.downcase] = [property.to_s, options]
+    end
+    
+    def primary_key(column, property = column, options = {})
+      @primary_keys[column.to_s.downcase] = property.to_s
+      @columns[column.to_s.downcase] = [property.to_s, options]
+    end
+    
+    def avoid(*columns)
+      @to_avoid += columns.map{|s| s.to_s.downcase}
+    end
   end
   
   Table = org.hibernate.mapping.Table
@@ -24,17 +63,21 @@ module Ribs
   end
   
   class << self
-    def define_ribs(on, options = {}, &block)
+    def define_ribs(on, options = {})
+      rib = Rib.new
+      yield rib if block_given?
+       
       define_metadata_on_class on
       rm = on.ribs_metadata
+      rm.rib = rib
 
       db = nil
       with_session(options[:db] || :default) do |s|
         db = s.db
         m = s.meta_data
-        name = table_name_for(on.name, m)
+        name = rib.table || table_name_for(on.name, m)
 
-        tables = m.get_tables nil, nil, name, %w(TABLE VIEW ALIAS SYNONYM).to_java(:String)
+        tables = m.get_tables nil, nil, name.to_s, %w(TABLE VIEW ALIAS SYNONYM).to_java(:String)
         if tables.next
           table = Table.new(tables.get_string(3))
           rm.table = table
@@ -69,22 +112,24 @@ module Ribs
           rm.persistent_class = pc
           
           table.column_iterator.each do |c|
-            prop = Property.new
-            prop.persistent_class = pc
-            prop.name = c.name
-            val = SimpleValue.new(table)
-            val.add_column(c)
-            val.type_name = get_type_for_sql(c.sql_type, c.sql_type_code)
-            prop.value = val
+            unless rib.to_avoid.include?(c.name.downcase)
+              prop = Property.new
+              prop.persistent_class = pc
+              prop.name = ((v=rib.columns[c.name.downcase]) && v[0]) || c.name
+              val = SimpleValue.new(table)
+              val.add_column(c)
+              val.type_name = get_type_for_sql(c.sql_type, c.sql_type_code)
+              prop.value = val
 
-            if c.name.downcase == 'id'
-              pc.identifier_property = prop
-              pc.identifier = val
-            else
-              pc.add_property(prop)
+              if (!rib.primary_keys.empty? && rib.primary_keys[c.name.downcase]) || c.name.downcase == 'id'
+                pc.identifier_property = prop
+                pc.identifier = val
+              else
+                pc.add_property(prop)
+              end
+              
+              define_meat_accessor(on, prop.name)
             end
-            
-            define_meat_accessor(on, prop.name)
           end
           pc.create_primary_key
           db.mappings.add_class(pc)
@@ -119,7 +164,14 @@ CODE
         "java.lang.String"
       when JTypes::INTEGER
         "int"
+      when JTypes::TIME
+        "java.sql.Time"
+      when JTypes::DATE
+        "java.sql.Date"
+      when JTypes::TIMESTAMP
+        "java.sql.Timestamp"
       else
+        $stderr.puts [name, code].inspect
         nil
       end
     end

@@ -38,8 +38,7 @@ module Ribs
     # LOW LEVEL - shouldn't be used
     def find(entity_name, id)
       chk_conn
-      case id
-      when :all
+      if id == :all
         @hibernate_session.create_criteria(entity_name).list.to_a
       else
         @hibernate_session.get(entity_name, java.lang.Integer.new(id))

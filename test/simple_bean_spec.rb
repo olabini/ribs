@@ -16,4 +16,6 @@ describe Artist do
   it "should return correct value and type for name property" do 
     Artist.find(:all).map { |a| a.name }.sort.should == ["David Bowie","New Model Army","Public Image Ltd"]
   end
+  
+  it "should only have the appropriate methods defined"
 end
