@@ -11,7 +11,6 @@ class Blog
 end
 
 class Post; end
-
 Ribs! :on => Post
 
 blogs = Blog.find :all
