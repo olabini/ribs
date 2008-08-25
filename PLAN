@@ -1,2 +1,21 @@
 Feature plan for Ribs
 ---------------------
+
+- Support all types in selects and inserts
+- Support all types in loading simple data
+- Support pluggable type handing
+- Support pluggable ID generation
+- Should setting/getting use the property methods?
+- Should handle saving up updated data in simple beans
+- Should handle creating new data instances
+- Should be able to remove instances
+- Should be able to do generic searches
+- Should be able to handle composite primary keys
+- Should be able to be smart about foreign key relationships
+- Should be able to handle one-to-one relationships
+- Should be able to handle one-to-many, many-to-one relationships
+- Should be able to handle many-to-many relationships
+- Should be possible to have value classes as part of definition
+- Should be able to handle subtyping
+- Should have a migration feature
+
