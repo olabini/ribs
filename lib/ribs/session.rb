@@ -84,7 +84,8 @@ module Ribs
       stmt = conn.create_statement
       rs = stmt.execute_query(string)
       result = []
-      cols = rs.meta_data.column_count
+      meta = rs.meta_data
+      cols = meta.column_count
       while rs.next
         row = []
         (1..cols).each do |n|
@@ -105,10 +106,18 @@ module Ribs
     
     def from_database_type(obj)
       case obj
-      when String, Integer, NilClass
+      when String, Float, Integer, NilClass, TrueClass, FalseClass
         obj
       when java.sql.Date, java.sql.Time, java.sql.Timestamp
         Time.at(obj.time/1000)
+      when java.sql.Blob
+        String.from_java_bytes(obj.get_bytes(1,obj.length))
+      when java.sql.Clob
+        obj.get_sub_string(1, obj.length)
+      when java.math.BigDecimal
+        BigDecimal.new(obj.to_s)
+      else
+        raise "Can't find correct type to convert #{obj.inspect} into"
       end
     end
     
@@ -117,7 +126,14 @@ module Ribs
       when NilClass
         stmt.set_object index, nil
       when String
-        stmt.set_string index, item
+        case type
+        when :binary
+          stmt.set_bytes index, item.to_java_bytes
+        when :text
+          stmt.set_string index, item
+        else
+          stmt.set_string index, item
+        end
       when Symbol
         stmt.set_string index, item.to_s
       when Integer
@@ -130,9 +146,11 @@ module Ribs
           stmt.set_date index, item.to_java_sql_date
         when :time
             stmt.set_time index, item.to_java_sql_time
-        when :times_stamp
-          stmt.set_time_stamp index, item.to_java_sql_time_stamp
+        when :timestamp
+          stmt.set_timestamp index, item.to_java_sql_time_stamp
         end
+      when BigDecimal
+        stmt.set_big_decimal index, java.math.BigDecimal.new(item.to_s('F'))
       when TrueClass, FalseClass
         stmt.set_boolean index, item
       else

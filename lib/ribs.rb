@@ -16,6 +16,8 @@ require 'slf4j-jdk14-1.5.2.jar'
 require 'hibernate3.jar'
 require 'ribs.jar'
 
+require 'bigdecimal'
+
 require 'ribs/db'
 require 'ribs/definition'
 require 'ribs/session'

@@ -1,6 +1,7 @@
 require 'java'
 require 'rubygems'
 require 'spec'
+require 'bigdecimal'
 require 'ribs'
 
 class Time
@@ -36,6 +37,13 @@ CREATE TABLE DB_TRACK (
   playTime TIME,
   added DATE,
   volume INT NOT NULL,
+  lastPlayed TIMESTAMP,
+  data BLOB,
+  description CLOB,
+  fraction FLOAT,
+  otherFraction DOUBLE,
+  good SMALLINT,
+  price DECIMAL(10,2),
   PRIMARY KEY (TRACK_ID)
 )
 SQL
@@ -49,12 +57,14 @@ CREATE TABLE ARTIST (
 SQL
   
   template = <<SQL
-INSERT INTO DB_TRACK(TRACK_ID, title, filePath, playTime, added, volume) VALUES(?, ?, ?, ?, ?, ?)
+INSERT INTO DB_TRACK(TRACK_ID, title, filePath, playTime, added, volume, lastPlayed, data, description, fraction, otherFraction, good, price) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 SQL
   
   s.insert(template, 
-           [1, "foobar", "c:/abc/cde/foo.mp3", [Time.time_at(14,50,0), :time], [Time.local(1984, 12, 13, 0,0,0), :date], 13], 
-           [2, "flux", "d:/abc/cde/flax.mp3", [Time.time_at(16,23,0), :time], [Time.local(1983, 12, 13, 0,0,0), :date], 13])
+           [1, "foobar", "c:/abc/cde/foo.mp3", [Time.time_at(14,50,0), :time], [Time.local(1984, 12, 13, 0,0,0), :date], 13, 
+            [Time.local(1984, 12, 14, 12,3,11), :timestamp], ["abc", :binary], ["foobar", :text], 3.4, 5.7, true, BigDecimal.new("13134.11")], 
+           [2, "flux", "d:/abc/cde/flax.mp3", [Time.time_at(16,23,0), :time], [Time.local(1983, 12, 13, 0,0,0), :date], 13,
+            [Time.local(1982, 5, 3, 13,3,7), :timestamp], ["mumsi", :binary], ["maxi", :text], 3.5, 35435.4522234, false, BigDecimal.new("55454.33")])
 
   s.insert("INSERT INTO ARTIST(ID, name) VALUES(?, ?)", 
            [1, "Public Image Ltd"],
