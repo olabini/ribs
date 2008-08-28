@@ -63,4 +63,16 @@ describe Track do
     props.values.map { |p| p.column_iterator.to_a[0].name }.sort.should == 
       ['VOLUME', 'TITLE', 'PLAYTIME', 'ADDED', 'OTHERFRACTION', 'LASTPLAYED', 'DATA', 'DESCRIPTION', 'FRACTION', 'GOOD', 'PRICE'].sort
   end
+  
+  it "should have correct value and type for OTHERFRACTION property"
+  it "should have correct value and type for VOLUME property"
+  it "should have correct value and type for track_title property"
+  it "should have correct value and type for time property"
+  it "should have correct value and type for date_added property"
+  it "should have correct value and type for file_data property"
+  it "should have correct value and type for desc property"
+  it "should have correct value and type for some_fraction property"
+  it "should have correct value and type for is_good property"
+  it "should have correct value and type for full_price property"
+  it "should have correct value and type for last_played_at property"
 end
