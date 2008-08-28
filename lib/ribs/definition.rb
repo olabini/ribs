@@ -170,6 +170,16 @@ CODE
         "java.sql.Date"
       when JTypes::TIMESTAMP
         "java.sql.Timestamp"
+      when JTypes::BLOB
+        "java.sql.Blob"
+      when JTypes::CLOB
+        "java.sql.Clob"
+      when JTypes::DOUBLE
+        "double"
+      when JTypes::SMALLINT
+        "boolean"
+      when JTypes::DECIMAL
+        "java.math.BigDecimal"
       else
         $stderr.puts [name, code].inspect
         nil

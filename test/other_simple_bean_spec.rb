@@ -6,6 +6,13 @@ require File.join(File.dirname(__FILE__), 'test_helper')
 #   playTime TIME,
 #   added DATE,
 #   volume INT NOT NULL,
+#   lastPlayed TIMESTAMP,
+#   data BLOB,
+#   description CLOB,
+#   fraction FLOAT,
+#   otherFraction DOUBLE,
+#   good SMALLINT,
+#   price DECIMAL(10,2),
 
 class Track
   Ribs! do |rib|
@@ -16,6 +23,12 @@ class Track
     rib.col :title, :track_title
     rib.col :playTime, :time
     rib.col :added, :date_added
+    rib.col :lastPlayed, :last_played_at
+    rib.col :data, :file_data
+    rib.col :description, :desc
+    rib.col :fraction, :some_fraction
+    rib.col :good, :is_good
+    rib.col :price, :full_price
     
     rib.avoid :filePath
   end
@@ -46,8 +59,8 @@ describe Track do
   it "should have correct names for defined properties" do 
     props = Track.ribs_metadata.properties
     # the primary keys aren't actually part of the properties
-    props.keys.sort.should == ['VOLUME', 'track_title', 'time', 'date_added'].sort
+    props.keys.sort.should == ['OTHERFRACTION', 'VOLUME', 'track_title', 'time', 'date_added', 'file_data', 'desc', 'some_fraction', 'is_good', 'full_price', 'last_played_at'].sort
     props.values.map { |p| p.column_iterator.to_a[0].name }.sort.should == 
-      ['VOLUME', 'TITLE', 'PLAYTIME', 'ADDED'].sort
+      ['VOLUME', 'TITLE', 'PLAYTIME', 'ADDED', 'OTHERFRACTION', 'LASTPLAYED', 'DATA', 'DESCRIPTION', 'FRACTION', 'GOOD', 'PRICE'].sort
   end
 end
