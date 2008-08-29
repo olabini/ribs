@@ -13,6 +13,11 @@ end
 task :default => [:spec]
 task :test => [:spec]
 
+desc "Flog all Ruby files in lib"
+task :flog do 
+  system("find lib -name '*.rb' | xargs flog")
+end
+
 desc "Run all specs"
 Spec::Rake::SpecTask.new(:spec) do |t|
   t.libs << "test"
