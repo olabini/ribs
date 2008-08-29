@@ -111,4 +111,31 @@ describe Track do
   it "should have correct value and type for last_played_at property" do 
     Track.find(:all).map { |a| a.last_played_at }.sort.should == [Time.local(1982, 5, 3, 13,3,7), Time.local(1984, 12, 14, 12,3,11)]
   end
+  
+  it "should be possible to create a new instance by setting properties"  
+  it "should be possible to create a new instance by giving properties to new"
+  it "should be possible to create a new instance by using create"
+
+  it "should have correct value and type for TRACK_ID property on newly created bean"
+  it "should have correct value and type for track_title property on newly created bean"
+  it "should have correct value and type for time property on newly created bean"
+  it "should have correct value and type for date_added property on newly created bean"
+  it "should have correct value and type for last_played_at property on newly created bean"
+  it "should have correct value and type for file_data property on newly created bean"
+  it "should have correct value and type for desc property on newly created bean"
+  it "should have correct value and type for some_fraction property on newly created bean"
+  it "should have correct value and type for is_good property on newly created bean"
+  it "should have correct value and type for full_price property on newly created bean"
+  it "should have correct value and type for volume property on newly created bean"
+
+  it "should be possible to update track_title property on existing bean"
+  it "should be possible to update time property on existing bean"
+  it "should be possible to update date_added property on existing bean"
+  it "should be possible to update last_played_at property on existing bean"
+  it "should be possible to update file_data property on existing bean"
+  it "should be possible to update desc property on existing bean"
+  it "should be possible to update some_fraction property on existing bean"
+  it "should be possible to update is_good property on existing bean"
+  it "should be possible to update full_price property on existing bean"
+  it "should be possible to update volume property on existing bean"
 end

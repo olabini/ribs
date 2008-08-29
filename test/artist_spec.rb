@@ -61,4 +61,6 @@ describe Artist do
       reset_database!
     end    
   end
+  
+  it "should be possible to update name property on existing bean"
 end
