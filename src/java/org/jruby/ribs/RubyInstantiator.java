@@ -25,6 +25,7 @@ public class RubyInstantiator implements Instantiator {
 		Ruby runtime = rc.getRuntime();
 		RubyClass rubyClass = rc;
 		IRubyObject ro = rubyClass.newInstance(runtime.getCurrentContext(), new IRubyObject[0], null);
+        ro.callMethod(runtime.getCurrentContext(), "__ribs_meat").callMethod(runtime.getCurrentContext(), "persistent=", runtime.getTrue());
 		return ro;
 	}
 

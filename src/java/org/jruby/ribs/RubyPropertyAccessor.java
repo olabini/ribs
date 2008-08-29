@@ -14,8 +14,11 @@ import org.hibernate.engine.SessionImplementor;
 import org.hibernate.property.Getter;
 import org.hibernate.property.PropertyAccessor;
 import org.hibernate.property.Setter;
+import org.hibernate.type.Type;
 import org.jruby.Ruby;
 import org.jruby.RubyBigDecimal;
+import org.jruby.RubyNumeric;
+import org.jruby.RubyFixnum;
 import org.jruby.RubyTime;
 import org.jruby.javasupport.JavaUtil;
 import org.jruby.runtime.Block;
@@ -23,6 +26,12 @@ import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.util.ByteList;
 
 public class RubyPropertyAccessor implements PropertyAccessor {
+    private Type type;
+
+    public RubyPropertyAccessor(Type type) {
+        this.type = type;
+    }
+
 	private boolean isRubyProxy(Object o) {
 		if(o instanceof IRubyObject) {
 			return ((IRubyObject)o).getType().getName().equals("ActiveHibernate::RubyProxy");
@@ -31,15 +40,23 @@ public class RubyPropertyAccessor implements PropertyAccessor {
 		}
 	}
 	
-	public Getter getGetter(Class theClass, final String propertyName) throws PropertyNotFoundException {
+	public Getter getGetter(final Class theClass, final String propertyName) throws PropertyNotFoundException {
 		return new Getter() {
 			public Object get(Object owner) throws HibernateException {
 				Ruby runtime = ((IRubyObject)owner).getRuntime();
 				IRubyObject rubyValue = ((IRubyObject)owner).callMethod(runtime.getCurrentContext(),propertyName.toLowerCase());
 				if(rubyValue instanceof RubyTime) {
 					return ((RubyTime)rubyValue).getJavaDate();
+                } else if(rubyValue instanceof RubyFixnum) {
+                    return RubyNumeric.fix2int(rubyValue);
+                } else if(rubyValue instanceof RubyBigDecimal) {
+                    return ((RubyBigDecimal)rubyValue).getValue();
 				} else if(isRubyProxy(rubyValue)) {
 					return rubyValue;
+                } else if(type.getReturnedClass() == java.sql.Blob.class) {
+                    return new org.hibernate.lob.BlobImpl(rubyValue.convertToString().getBytes());
+                } else if(type.getReturnedClass() == java.sql.Clob.class) {
+                    return new org.hibernate.lob.ClobImpl(rubyValue.convertToString().toString());
 				} else {
 					return JavaUtil.convertRubyToJava(rubyValue); 
 				}

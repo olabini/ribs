@@ -27,7 +27,7 @@ public class RubyTuplizer extends AbstractEntityTuplizer {
 			return mappedProperty.getPropertyAccessor(null);
 		}
 		else {
-			return new RubyPropertyAccessor();
+			return new RubyPropertyAccessor(mappedProperty.getType());
 		}
 	}
 	

@@ -1,4 +1,44 @@
 module Ribs
+  module ClassMethods
+    attr_reader :ribs_metadata
+
+    def new(attrs = {})
+      obj = super()
+      attrs.each do |k,v|
+        obj.send :"#{k}=", v
+      end
+      obj
+    end
+    
+    def create(attrs = {})
+      val = new(attrs)
+      val.save
+      val
+    end
+    
+    def find(id_or_sym)
+      Ribs.with_session do |s|
+        s.find(self.ribs_metadata.persistent_class.entity_name, id_or_sym)
+      end
+    end
+  end
+  
+  module InstanceMethods
+    def __ribs_meat
+      @__ribs_meat ||= Ribs::Meat.new(self)
+    end
+        
+    def inspect
+      "#<#{self.class.name}: #{self.__ribs_meat.properties.inspect}>"
+    end
+    
+    def save
+      Ribs.with_session do |s|
+        s.save(self)
+      end
+    end
+  end
+  
   class MetaData
     attr_accessor :table
     attr_accessor :persistent_class
@@ -199,23 +239,10 @@ CODE
     def define_metadata_on_class(clazz)
       clazz.instance_variable_set :@ribs_metadata, Ribs::MetaData.new
       class << clazz
-        attr_reader :ribs_metadata
-        
-        def find(id_or_sym)
-          Ribs.with_session do |s|
-            s.find(self.ribs_metadata.persistent_class.entity_name, id_or_sym)
-          end
-        end
+        include ClassMethods
       end
-      
       clazz.class_eval do 
-        def __ribs_meat
-          @__ribs_meat ||= Ribs::Meat.new(self)
-        end
-        
-        def inspect
-          "#<#{self.class.name}: #{self.__ribs_meat.properties.inspect}>"
-        end
+        include InstanceMethods
       end
     end
   end

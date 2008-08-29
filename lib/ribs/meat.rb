@@ -1,6 +1,7 @@
 module Ribs
   class Meat
     attr_reader :properties
+    attr_accessor :persistent
     
     def initialize(inside)
       @inside = inside
