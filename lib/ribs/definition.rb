@@ -21,6 +21,12 @@ module Ribs
         s.find(self.ribs_metadata.persistent_class.entity_name, id_or_sym)
       end
     end
+
+    def destroy(id)
+      Ribs.with_session do |s|
+        s.delete(find(id))
+      end
+    end
   end
   
   module InstanceMethods
@@ -35,6 +41,13 @@ module Ribs
     def save
       Ribs.with_session do |s|
         s.save(self)
+      end
+    end
+    
+    def destroy!
+      __ribs_meat.destroyed = true
+      Ribs.with_session do |s|
+        s.delete(self)
       end
     end
   end

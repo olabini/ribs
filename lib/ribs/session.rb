@@ -60,6 +60,15 @@ module Ribs
     end
 
     # LOW LEVEL - shouldn't be used except by Ribs
+    def delete(obj)
+      chk_conn
+      tx = @hibernate_session.begin_transaction
+      @hibernate_session.delete(obj)
+      tx.commit
+      obj
+    end
+    
+    # LOW LEVEL - shouldn't be used except by Ribs
     def meta_data
       chk_conn
       @hibernate_session.connection.meta_data

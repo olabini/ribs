@@ -395,5 +395,21 @@ describe Track do
     end
   end
   
-  it "should be possible to delete existing bean"
+  it "should be possible to delete existing bean" do 
+    begin
+      Track.find(1).destroy!
+      Track.find(1).should be_nil
+    ensure
+      reset_database!
+    end
+  end
+  
+  it "should be possible to delete existing bean by id" do 
+    begin
+      Track.destroy(2)
+      Track.find(2).should be_nil
+    ensure
+      reset_database!
+    end
+  end
 end

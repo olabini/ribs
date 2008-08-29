@@ -19,7 +19,7 @@ describe Artist do
   
   it "should only have the appropriate methods defined" do 
     methods = (Artist.instance_methods - Object.instance_methods).sort
-    methods.should == ['__ribs_meat', 'id=', 'name', 'name=', 'save']
+    methods.should == ['__ribs_meat', 'destroy!', 'id=', 'name', 'name=', 'save']
   end
   
   it "should be possible to create a new instance by setting properties" do 
@@ -74,5 +74,21 @@ describe Artist do
     end
   end
 
-  it "should be possible to delete existing bean"
+  it "should be possible to delete existing bean" do 
+    begin
+      Artist.find(2).destroy!
+      Artist.find(2).should be_nil
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to delete existing bean by id" do 
+    begin
+      Artist.destroy(2)
+      Artist.find(2).should be_nil
+    ensure
+      reset_database!
+    end
+  end
 end

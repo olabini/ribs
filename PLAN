@@ -2,10 +2,10 @@ Feature plan for Ribs
 ---------------------
 
 * Support all types in selects
-- Support all types in inserts
-- Should handle creating new data instances
-- Should handle saving up updated data in simple beans
-- Should be able to remove instances
+* Support all types in inserts
+* Should handle creating new data instances
+* Should handle saving up updated data in simple beans
+* Should be able to remove instances
 - Support pluggable type handing
 - Support pluggable ID generation
 - Should be able to do generic searches (Complicated such)
