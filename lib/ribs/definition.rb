@@ -160,7 +160,7 @@ module Ribs
               val.add_column(c)
               val.type_name = get_type_for_sql(c.sql_type, c.sql_type_code)
               prop.value = val
-
+              
               if (!rib.primary_keys.empty? && rib.primary_keys[c.name.downcase]) || c.name.downcase == 'id'
                 pc.identifier_property = prop
                 pc.identifier = val
@@ -201,7 +201,7 @@ CODE
     def get_type_for_sql(name, code)
       case code
       when JTypes::VARCHAR
-        "java.lang.String"
+        "string"
       when JTypes::INTEGER
         "int"
       when JTypes::TIME

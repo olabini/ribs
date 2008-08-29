@@ -72,6 +72,7 @@ module Ribs
         properties.set_property(key, value)
       end
       @configuration = Configuration.new.add_properties(properties)
+      @configuration.set_interceptor org.jruby.ribs.EntityNameInterceptor.new
       @mappings = @configuration.create_mappings
       reset_session_factory!
     end

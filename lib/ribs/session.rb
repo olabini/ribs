@@ -30,12 +30,12 @@ module Ribs
       @db.release(self)
     end
 
-    # LOW LEVEL - shouldn't be used
+    # LOW LEVEL - shouldn't be used except by Ribs
     def hibernate_session
       @hibernate_session
     end
     
-    # LOW LEVEL - shouldn't be used
+    # LOW LEVEL - shouldn't be used except by Ribs
     def find(entity_name, id)
       chk_conn
       if id == :all
@@ -45,33 +45,33 @@ module Ribs
       end
     end
 
-    # LOW LEVEL - shouldn't be used
+    # LOW LEVEL - shouldn't be used except by Ribs
     def save(obj)
       chk_conn
       tx = @hibernate_session.begin_transaction
       if obj.__ribs_meat.persistent
-        @hibernate_session.update(obj.class.ribs_metadata.persistent_class.entity_name, obj)
+        @hibernate_session.update(obj)
       else
-        @hibernate_session.save(obj.class.ribs_metadata.persistent_class.entity_name, obj)
+        @hibernate_session.save(obj)
         obj.__ribs_meat.persistent = true
       end
       tx.commit
       obj
     end
 
-    # LOW LEVEL - shouldn't be used
+    # LOW LEVEL - shouldn't be used except by Ribs
     def meta_data
       chk_conn
       @hibernate_session.connection.meta_data
     end
     
-    # LOW LEVEL - shouldn't be used
+    # LOW LEVEL - shouldn't be used except by Ribs
     def ddl(string)
       chk_conn
       execute(string)
     end
     
-    # LOW LEVEL - shouldn't be used
+    # LOW LEVEL - shouldn't be used except by Ribs
     def insert(template, *data)
       chk_conn
       conn = @hibernate_session.connection
@@ -91,7 +91,7 @@ module Ribs
       stmt.close rescue nil
     end
 
-    # LOW LEVEL - shouldn't be used
+    # LOW LEVEL - shouldn't be used except by Ribs
     def select(string)
       chk_conn
       conn = @hibernate_session.connection

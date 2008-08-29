@@ -62,5 +62,17 @@ describe Artist do
     end    
   end
   
-  it "should be possible to update name property on existing bean"
+  it "should be possible to update name property on existing bean" do 
+    begin
+      artist = Artist.find(2)
+      artist.name = "U2"
+      Artist.find(2).name.should == "New Model Army"
+      artist.save
+      Artist.find(2).name.should == "U2"
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to delete existing bean"
 end
