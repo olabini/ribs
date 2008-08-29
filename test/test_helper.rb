@@ -6,7 +6,7 @@ require 'ribs'
 
 class Time
   def self.time_at(hrs, min, sec)
-    Time.at(hrs*3600 + min*60 + sec)
+    Time.local(1970, 1, 1, hrs, min, sec)
   end
 
   def self.date_at(year, month, day)

@@ -275,14 +275,125 @@ describe Track do
     end
   end
 
-  it "should be possible to update track_title property on existing bean"
-  it "should be possible to update time property on existing bean"
-  it "should be possible to update date_added property on existing bean"
-  it "should be possible to update last_played_at property on existing bean"
-  it "should be possible to update file_data property on existing bean"
-  it "should be possible to update desc property on existing bean"
-  it "should be possible to update some_fraction property on existing bean"
-  it "should be possible to update is_good property on existing bean"
-  it "should be possible to update full_price property on existing bean"
-  it "should be possible to update volume property on existing bean"
+  it "should be possible to update track_title property on existing bean" do 
+    begin
+      v = Track.find(1)
+      v.track_title = "new value here"
+      v.save
+      
+      Track.find(1).track_title.should == "new value here"
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to update time property on existing bean" do 
+    begin
+      v = Track.find(1)
+      v.time = Time.time_at(23,32,33)
+      v.save
+      
+      Track.find(1).time.should == Time.time_at(23,32,33)
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to update date_added property on existing bean" do 
+    begin
+      v = Track.find(1)
+      v.date_added = Time.local(2004,10,9,0,0,0)
+      v.save
+      
+      Track.find(1).date_added.should == Time.local(2004,10,9,0,0,0)
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to update last_played_at property on existing bean" do 
+    begin
+      v = Track.find(1)
+      v.last_played_at = Time.local(2005,8,8,10,24,12)
+      v.save
+      
+      Track.find(1).last_played_at.should == Time.local(2005,8,8,10,24,12)
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to update file_data property on existing bean" do 
+    begin
+      v = Track.find(1)
+      v.file_data = "Some data"
+      v.save
+      
+      Track.find(1).file_data.should == "Some data"
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to update desc property on existing bean" do 
+    begin
+      v = Track.find(1)
+      v.desc = "Some description"
+      v.save
+      
+      Track.find(1).desc.should == "Some description"
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to update some_fraction property on existing bean" do 
+    begin
+      v = Track.find(1)
+      v.some_fraction = 3.1416 #Anal test
+      v.save
+      
+      Track.find(1).some_fraction.should be_close(3.1416, 0.00001)
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to update is_good property on existing bean" do 
+    begin
+      v = Track.find(1)
+      v.is_good = false
+      v.save
+      
+      Track.find(1).is_good.should be_false
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to update full_price property on existing bean" do 
+    begin
+      v = Track.find(1)
+      v.full_price = BigDecimal.new("142.12")
+      v.save
+      
+      Track.find(1).full_price.should == BigDecimal.new("142.12")
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to update volume property on existing bean" do 
+    begin
+      v = Track.find(1)
+      v.volume = 42
+      v.save
+      
+      Track.find(1).volume.should == 42
+    ensure
+      reset_database!
+    end
+  end
+  
+  it "should be possible to delete existing bean"
 end
