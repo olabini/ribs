@@ -1,19 +1,5 @@
 require File.join(File.dirname(__FILE__), 'test_helper')
 
-#   TRACK_ID INT NOT NULL,
-#   title VARCHAR(255) NOT NULL,
-#   filePath VARCHAR(255) NOT NULL,
-#   playTime TIME,
-#   added DATE,
-#   volume INT NOT NULL,
-#   lastPlayed TIMESTAMP,
-#   data BLOB,
-#   description CLOB,
-#   fraction FLOAT,
-#   otherFraction DOUBLE,
-#   good SMALLINT,
-#   price DECIMAL(10,2),
-
 class Track
   Ribs! do |rib|
     rib.table = :DB_TRACK
@@ -112,21 +98,182 @@ describe Track do
     Track.find(:all).map { |a| a.last_played_at }.sort.should == [Time.local(1982, 5, 3, 13,3,7), Time.local(1984, 12, 14, 12,3,11)]
   end
   
-  it "should be possible to create a new instance by setting properties"  
-  it "should be possible to create a new instance by giving properties to new"
-  it "should be possible to create a new instance by using create"
+  it "should be possible to create a new instance by setting properties" do 
+    begin 
+      track = Track.new
+      track.track_id = 3
+      track.track_title = "Born to raise hell"
+      track.time = Time.time_at(0,3,25)
+      track.date_added = Time.local(2003, 8, 31, 0, 0, 0)
+      track.last_played_at = Time.local(2008, 8, 31, 21, 41, 30)
+      track.file_data = "abc def"
+      track.desc = "This track I really don't know anything about, in fact"
+      track.some_fraction = 3.1415
+      track.is_good = false
+      track.full_price = BigDecimal.new("14.49")
+      track.volume = 5
 
-  it "should have correct value and type for TRACK_ID property on newly created bean"
-  it "should have correct value and type for track_title property on newly created bean"
-  it "should have correct value and type for time property on newly created bean"
-  it "should have correct value and type for date_added property on newly created bean"
-  it "should have correct value and type for last_played_at property on newly created bean"
-  it "should have correct value and type for file_data property on newly created bean"
-  it "should have correct value and type for desc property on newly created bean"
-  it "should have correct value and type for some_fraction property on newly created bean"
-  it "should have correct value and type for is_good property on newly created bean"
-  it "should have correct value and type for full_price property on newly created bean"
-  it "should have correct value and type for volume property on newly created bean"
+      Track.find(3).should be_nil
+      
+      track.save
+
+      Track.find(3).should_not be_nil
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to create a new instance by giving properties to new" do 
+    begin 
+      track = Track.new(
+                        :track_id => 3,
+                        :track_title => "Born to raise hell",
+                        :time => Time.time_at(0,3,25),
+                        :date_added => Time.local(2003, 8, 31, 0, 0, 0),
+                        :last_played_at => Time.local(2008, 8, 31, 21, 41, 30),
+                        :file_data => "abc def",
+                        :desc => "This track I really don't know anything about, in fact",
+                        :some_fraction => 3.1415,
+                        :is_good => false,
+                        :full_price => BigDecimal.new("14.49"),
+                        :volume => 5)
+
+      Track.find(3).should be_nil
+
+      track.save
+
+      Track.find(3).should_not be_nil
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should be possible to create a new instance by using create" do 
+    begin 
+      Track.find(3).should be_nil
+      track = Track.create(
+                        :track_id => 3,
+                        :track_title => "Born to raise hell",
+                        :time => Time.time_at(0,3,25),
+                        :date_added => Time.local(2003, 8, 31, 0, 0, 0),
+                        :last_played_at => Time.local(2008, 8, 31, 21, 41, 30),
+                        :file_data => "abc def",
+                        :desc => "This track I really don't know anything about, in fact",
+                        :some_fraction => 3.1415,
+                        :is_good => false,
+                        :full_price => BigDecimal.new("14.49"),
+                        :volume => 5)
+
+      Track.find(3).should_not be_nil
+    ensure
+      reset_database!
+    end
+  end
+
+  def create_simple
+    Track.create(
+                 :track_id => 3,
+                 :track_title => "Born to raise hell",
+                 :time => Time.time_at(0,3,25),
+                 :date_added => Time.local(2003, 8, 31, 0, 0, 0),
+                 :last_played_at => Time.local(2008, 8, 31, 21, 41, 30),
+                 :file_data => "abc def",
+                 :desc => "This track I really don't know anything about, in fact",
+                 :some_fraction => 3.1415,
+                 :is_good => false,
+                 :full_price => BigDecimal.new("14.49"),
+                 :volume => 5)
+    
+    Track.find(3)
+  end
+  
+  it "should have correct value and type for TRACK_ID property on newly created bean" do 
+    begin
+      create_simple.track_id.should == 3
+    ensure
+      reset_database!
+    end
+  end
+
+  it "should have correct value and type for track_title property on newly created bean" do 
+    begin
+      create_simple.track_title.should == "Born to raise hell"
+    ensure
+      reset_database!
+    end
+  end
+  
+  it "should have correct value and type for time property on newly created bean" do 
+    begin
+      create_simple.time.should == Time.time_at(0,3,25)
+    ensure
+      reset_database!
+    end
+  end
+  
+  it "should have correct value and type for date_added property on newly created bean" do 
+    begin
+      create_simple.date_added.should == Time.local(2003, 8, 31, 0, 0, 0)
+    ensure
+      reset_database!
+    end
+  end
+  
+  it "should have correct value and type for last_played_at property on newly created bean" do 
+    begin
+      create_simple.last_played_at.should == Time.local(2008, 8, 31, 21, 41, 30)
+    ensure
+      reset_database!
+    end
+  end
+  
+  it "should have correct value and type for file_data property on newly created bean" do 
+    begin
+      create_simple.file_data.should == "abc def"
+    ensure
+      reset_database!
+    end
+  end
+  
+  it "should have correct value and type for desc property on newly created bean" do 
+    begin
+      create_simple.desc.should == "This track I really don't know anything about, in fact"
+    ensure
+      reset_database!
+    end
+  end
+  
+  it "should have correct value and type for some_fraction property on newly created bean" do 
+    begin
+      create_simple.some_fraction.should be_close(3.1415, 0.00001)
+    ensure
+      reset_database!
+    end
+  end
+  
+  it "should have correct value and type for is_good property on newly created bean" do 
+    begin
+      create_simple.is_good.should be_false
+    ensure
+      reset_database!
+    end
+  end
+  
+  it "should have correct value and type for full_price property on newly created bean" do 
+    begin
+      create_simple.full_price.should == BigDecimal.new("14.49")
+    ensure
+      reset_database!
+    end
+  end
+  
+  it "should have correct value and type for volume property on newly created bean" do 
+    begin
+      create_simple.volume.should == 5
+    ensure
+      reset_database!
+    end
+  end
 
   it "should be possible to update track_title property on existing bean"
   it "should be possible to update time property on existing bean"
