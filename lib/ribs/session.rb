@@ -48,14 +48,14 @@ module Ribs
     # LOW LEVEL - shouldn't be used
     def save(obj)
       chk_conn
-#       tx = @hibernate_session.begin_transaction
+      tx = @hibernate_session.begin_transaction
       if obj.__ribs_meat.persistent
         @hibernate_session.update(obj.class.ribs_metadata.persistent_class.entity_name, obj)
       else
         @hibernate_session.save(obj.class.ribs_metadata.persistent_class.entity_name, obj)
         obj.__ribs_meat.persistent = true
       end
-#       tx.commit
+      tx.commit
       obj
     end
 
