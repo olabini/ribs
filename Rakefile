@@ -4,7 +4,10 @@ require 'rake/rdoctask'
 require 'spec/rake/spectask'
 
 task :ant do 
-  system('ant')
+  ret = system('ant')
+  if !ret
+    raise "Compilation error"
+  end
 end
 
 task :default => [:spec]

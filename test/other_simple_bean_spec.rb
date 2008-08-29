@@ -64,15 +64,51 @@ describe Track do
       ['VOLUME', 'TITLE', 'PLAYTIME', 'ADDED', 'OTHERFRACTION', 'LASTPLAYED', 'DATA', 'DESCRIPTION', 'FRACTION', 'GOOD', 'PRICE'].sort
   end
   
-  it "should have correct value and type for OTHERFRACTION property"
-  it "should have correct value and type for VOLUME property"
-  it "should have correct value and type for track_title property"
-  it "should have correct value and type for time property"
-  it "should have correct value and type for date_added property"
-  it "should have correct value and type for file_data property"
-  it "should have correct value and type for desc property"
-  it "should have correct value and type for some_fraction property"
-  it "should have correct value and type for is_good property"
-  it "should have correct value and type for full_price property"
-  it "should have correct value and type for last_played_at property"
+  it "should have correct value and type for OTHERFRACTION property" do 
+    res = Track.find(:all).map { |a| a.otherfraction }.sort
+    res[0].should be_close(5.7, 0.00001)
+    res[1].should be_close(35435.4522234, 0.01)
+  end
+
+  it "should have correct value and type for VOLUME property" do 
+    Track.find(:all).map { |a| a.volume }.sort.should == [13, 13]
+  end
+  
+  it "should have correct value and type for track_title property" do 
+    Track.find(:all).map { |a| a.track_title }.sort.should == ["flux", "foobar"]
+  end
+
+  it "should have correct value and type for time property" do 
+    Track.find(:all).map { |a| a.time }.sort.should == [Time.time_at(14,50,0), Time.time_at(16,23,0)]
+  end
+
+  it "should have correct value and type for date_added property" do 
+    Track.find(:all).map { |a| a.date_added }.sort.should == [Time.local(1983, 12, 13, 0, 0, 0),Time.local(1984, 12, 13, 0, 0, 0)]
+  end
+  
+  it "should have correct value and type for file_data property" do 
+    Track.find(:all).map { |a| a.file_data }.sort.should == ["abc", "mumsi"]
+  end
+
+  it "should have correct value and type for desc property" do 
+    Track.find(:all).map { |a| a.desc }.sort.should == ["foobar", "maxi"]
+  end
+  
+  it "should have correct value and type for some_fraction property" do 
+    res = Track.find(:all).map { |a| a.some_fraction }.sort
+    res[0].should be_close(3.4, 0.00001)
+    res[1].should be_close(3.5, 0.00001)
+  end
+  
+  it "should have correct value and type for is_good property" do 
+    Track.find(:all).map { |a| a.is_good }.sort_by{|v| v ? 0 : 1}.should == [true, false]
+  end
+  
+  it "should have correct value and type for full_price property" do 
+    Track.find(:all).map { |a| a.full_price }.sort.should == [BigDecimal.new("13134.11"), BigDecimal.new("55454.33")]
+  end
+
+  it "should have correct value and type for last_played_at property" do 
+    Track.find(:all).map { |a| a.last_played_at }.sort.should == [Time.local(1982, 5, 3, 13,3,7), Time.local(1984, 12, 14, 12,3,11)]
+  end
 end

@@ -1,8 +1,12 @@
 package org.jruby.ribs;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLException;
+import java.util.Date;
 import java.util.Map;
-
 import org.hibernate.HibernateException;
 import org.hibernate.PropertyNotFoundException;
 import org.hibernate.engine.SessionFactoryImplementor;
@@ -10,13 +14,13 @@ import org.hibernate.engine.SessionImplementor;
 import org.hibernate.property.Getter;
 import org.hibernate.property.PropertyAccessor;
 import org.hibernate.property.Setter;
-
 import org.jruby.Ruby;
+import org.jruby.RubyBigDecimal;
 import org.jruby.RubyTime;
 import org.jruby.javasupport.JavaUtil;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.builtin.IRubyObject;
-
+import org.jruby.util.ByteList;
 
 public class RubyPropertyAccessor implements PropertyAccessor {
 	private boolean isRubyProxy(Object o) {
@@ -73,16 +77,28 @@ public class RubyPropertyAccessor implements PropertyAccessor {
 					throws HibernateException {
 				Ruby runtime = ((IRubyObject)target).getRuntime();
 				
-				IRubyObject rubyObject = null;
-				if(value instanceof java.util.Date) {
-					long milisecs = ((java.util.Date)value).getTime();
-					rubyObject = RubyTime.newTime(runtime, milisecs);
-				} else {
-					rubyObject = JavaUtil.convertJavaToRuby(runtime, value);
-				}
-				
-				((IRubyObject)target).callMethod(runtime.getCurrentContext(),propertyName.toLowerCase()+"=",
-						new IRubyObject[] {rubyObject});
+                try {
+                    IRubyObject rubyObject = null;
+                    if(value instanceof Date) {
+                        long milisecs = ((Date)value).getTime();
+                        rubyObject = RubyTime.newTime(runtime, milisecs);
+                    } else if(value instanceof Blob) {
+                        byte[] bytes = ((Blob)value).getBytes(1, (int)((Blob)value).length());
+                        rubyObject = runtime.newString(new ByteList(bytes, false));
+                    } else if(value instanceof Clob) {
+                        String str = ((Clob)value).getSubString(1, (int)((Clob)value).length());
+                        rubyObject = runtime.newString(str);
+                    } else if(value instanceof BigDecimal) {
+                        rubyObject = new RubyBigDecimal(runtime, (BigDecimal)value);
+                    } else {
+                        rubyObject = JavaUtil.convertJavaToRuby(runtime, value);
+                    }
+                    
+                    ((IRubyObject)target).callMethod(runtime.getCurrentContext(),propertyName.toLowerCase()+"=",
+                                                     new IRubyObject[] {rubyObject});
+                } catch(SQLException e) {
+                    throw new HibernateException(e);
+                }
 			}
 		};
 	}
