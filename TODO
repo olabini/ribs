@@ -1,3 +1,7 @@
+- Create some documentation
+- Create some examples
+- Create gem packaging
+
 - Add default values
 - Add default value to avoid so that AVOID values can be used for NOT NULL
 
