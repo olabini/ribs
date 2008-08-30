@@ -1,2 +1,5 @@
 build
 lib/ribs.jar
+pkg
+derby.log
+examples/blog

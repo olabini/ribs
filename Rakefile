@@ -54,7 +54,7 @@ specification = Gem::Specification.new do |s|
   s.rdoc_options << '--title' << 'xample' << '--main' << 'README' << '--line-numbers'
 
   s.email = 'ola.bini@gmail.com'
-  s.files = FileList['{lib,test}/**/*.rb', '[A-Z]*$', 'Rakefile'].to_a
+  s.files = FileList['{lib,test}/**/*.{rb,jar}', '[A-Z]*$', 'Rakefile'].to_a
 #  s.add_dependency('mocha', '>= 0.5.5')
 end
 

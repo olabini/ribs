@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'ribs'
 
 Ribs::DB.define do |db|
