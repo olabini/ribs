@@ -1,8 +1,27 @@
 module Ribs
+  # A Ribs session maps many-to-one with a Hibernate session. When
+  # there are no more Ribs sessions left, the Hibernate session will
+  # be released too.
+  #
+  # The methods in Session is not to be used outside the framework in
+  # most cases, since they are internal, brittle, not based on
+  # Hibernate in all cases, and very much subject to change. Currently
+  # they provide capabilities that aren't part of the framework yet,
+  # such as migrations and setting up test data.
+  #
   class Session
+    # This error is thrown when an operation on a session is
+    # attempted but the internal Hibernate session has already
+    # been closed.
+    #
     class NotConnectedError < StandardError;end
 
     class << self
+      # Returns a session object from the database +from+. The
+      # available values for from is either one of the existing
+      # defined database names, or <tt>:default</tt>, which will give
+      # a session to the default database.
+      #
       def get(from = :default)
         db = case from
              when :default
@@ -16,14 +35,21 @@ module Ribs
       end
     end
     
+    # The current database for this session
     attr_reader :db
     
+    # Creates a new session that points to the provided +db+ and
+    # +hibernate_session+
+    #
     def initialize(db, hibernate_session)
       @db = db
       @connected = true
       @hibernate_session = hibernate_session
     end
     
+    # Releases this session from the database.  This will possibly
+    # result in closing the internal Hibernate session, if this is the
+    # last Ribs session pointing to that Hibernate session.
     def release
       chk_conn
       @connected = false
@@ -123,10 +149,25 @@ module Ribs
     end
     
     private
+    # Raise a NotConnectedError if not connected
     def chk_conn
       raise NotConnectedError unless @connected
     end
     
+    # Tries to turn a Java object from the database into an equivalent
+    # Ruby object. Currently supports:
+    #
+    # * Strings
+    # * Floats
+    # * Integers
+    # * nil
+    # * booleans
+    # * Dates
+    # * Times
+    # * Timestamps
+    # * Blobs
+    # * Clobs
+    # * BigDecimals
     def from_database_type(obj)
       case obj
       when String, Float, Integer, NilClass, TrueClass, FalseClass
@@ -143,7 +184,8 @@ module Ribs
         raise "Can't find correct type to convert #{obj.inspect} into"
       end
     end
-    
+
+    # Tries to set an entry on a prepared statement, based on type
     def set_prepared_statement(stmt, item, index, type)
       case item
       when NilClass
@@ -180,7 +222,9 @@ module Ribs
         raise "Can't find correct type to set prepared statement for #{item.inspect}"
       end
     end
-    
+
+    # Executes a SQL string against the current hibernate
+    # session. This should be an updating SQL string, not a query.
     def execute(string)
       conn = @hibernate_session.connection
       stmt = conn.create_statement
