@@ -1,1 +1,139 @@
-Ribs is a Ruby ORM/DAO based on Hibernate, running on JRuby.
+= Ribs - A Ruby ORM using Hibernate
+
+The current ORM approaches for Ruby include ActiveRecord, DataMapper
+and RBatis. None of these have the versatility and power that
+Hibernate gives to any Java project. Ribs is a new interpretation of
+the idea ActiveHibernate, which was proposed in a blog post
+here[http://olabini.com/blog/2007/04/activehibernate-any-takers/]. The
+original name didn't really suit, though, since it was based on the
+ActiveRecord name, and Ribs will end up being something quite
+different.
+
+So what is Ribs? It's a Ruby framework written for JRuby, that allows
+you to use Hibernate to persist your Ruby objects. There are many
+things planned for Ribs, but currently it only supports quite basic
+operations.
+
+== Definitions
+
+To get started, you first need to define a database connection for
+Ribs to use. In most cases you only have one, but Ribs doesn't
+preclude you defining several and using them in different places. The
+code for doing that looks like this:
+
+  Ribs::DB.define do |db|
+    db.dialect = 'Derby'
+    db.uri = 'jdbc:derby:test_database;create=true'
+    db.driver = 'org.apache.derby.jdbc.EmbeddedDriver'
+  end
+
+You can also provide username, password, and other properties that
+will be passed through to Hibernate. Currently, Derby is the only
+database tested against, but most of the features used are totally
+database independent, and Hibernate shields Ribs from most of the
+rest.
+
+See the define method and the Ribs::DB class for more information on
+what's available.
+
+To actually make a Ruby class a database backed objects, you use the
+method {Kernel#Ribs!}[link:classes/Kernel.html#M000038] In the simple case you don't need to actually
+provide any configuration, but support is available for renaming
+columns, deciding which one is the primary key, and also avoid making
+columns part of the object. The simple case looks like this:
+
+  class Blog
+    Ribs!
+  end
+
+It can also be written as:
+
+  class Blog; end
+
+  Ribs! :on => Blog
+
+There is no need to actually have the Ribs definition inside of the
+model class. You can define that a model should go against a specific
+database definition if you want - by default it will use the default
+database.
+
+In the above example, the table name backing the model will be assumed
+to be "blog". Case is not important here. Ribs tries to find the table
+no matter what.
+
+To redefine which table to use, the names of the columns, and where
+the primary key is, you need to provide a block to the {Ribs!}[link:classes/Kernel.html#M000038] method:
+
+  class Blog
+    Ribs! do |r|
+      r.table :blogs
+
+      r.primary_key :blog_id
+
+      r.col :title, :blog_title
+
+      r.avoid :irrelevant_column
+    end
+  end
+
+This code will back the model against the "blogs" table, have the
+column name blog_id represent the primary key, and map the column
+title to the property blog_title. Note that primary_key[link:classes/Ribs/Rib.html#M000028] can take a
+second parameter that is the property name. Finally, avoid[link:classes/Ribs/Rib.html#M000029] tells Ribs
+to avoid a specific column.
+
+Currently Ribs only supports simple data types. It doesn't include
+associations, and have no support for setting default values, or
+constraints in the definitions. It's not possible to set the types in
+the definitions either.
+
+== Usage
+
+Once you have a defined model, you can work with it in several
+different ways.
+
+If you want to create new instances you can do it much like with
+ActiveRecord:
+
+  blog = Blog.new
+  blog.blog_id = 1
+  blog.blog_title = "Foobar"
+  blog.save
+
+The new method can take the parameters as a hash of symbols too:
+
+  blog = Blog.new(
+    :blog_id => 1,
+    :blog_title => "Foobar")
+  blog.save
+
+And as a short hand a create method is available:
+
+  blog = Blog.create(
+    :blog_id => 1,
+    :blog_title => "Foobar")
+
+To find a specific entry:
+
+  blog = Blog.find(1)
+
+Or to find all entries:
+
+  blogs = Blog.find(:all)
+
+To update an entry:
+  
+  blog.blog_title = "New title"
+  blog.save
+
+To destroy an existing entry:
+
+  blog.destroy!
+
+Or to destroy it based on id:
+ 
+  Blog.destroy(1)
+
+== License
+
+Ribs is released under the MIT license.

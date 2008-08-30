@@ -5,7 +5,7 @@ module Ribs
     def new(attrs = {})
       obj = super()
       attrs.each do |k,v|
-        obj.send :"#{k}=", v
+        obj.send("#{k}=", v)
       end
       obj
     end
@@ -71,7 +71,7 @@ module Ribs
   end
 
   class Rib
-    attr_accessor :table
+    attr_reader :table
     attr_reader :columns
     attr_reader :primary_keys
     attr_reader :to_avoid
@@ -80,6 +80,10 @@ module Ribs
       @columns = { }
       @primary_keys = { }
       @to_avoid = []
+    end
+    
+    def table(name)
+      @table = name
     end
     
     def col(column, property = column, options = {})

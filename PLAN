@@ -6,6 +6,7 @@ Feature plan for Ribs
 * Should handle creating new data instances
 * Should handle saving up updated data in simple beans
 * Should be able to remove instances
+- Support ID generation
 - Support pluggable type handing
 - Support pluggable ID generation
 - Should be able to do generic searches (Complicated such)
@@ -18,4 +19,4 @@ Feature plan for Ribs
 - Should be able to handle subtyping
 - Should have a migration feature
 - Should setting/getting use the property methods?
-
+- Add phases to database definitions (as Rails environments)

@@ -31,12 +31,12 @@ module Ribs
     end
 
     # LOW LEVEL - shouldn't be used except by Ribs
-    def hibernate_session
+    def hibernate_session # :nodoc:
       @hibernate_session
     end
     
     # LOW LEVEL - shouldn't be used except by Ribs
-    def find(entity_name, id)
+    def find(entity_name, id) # :nodoc:
       chk_conn
       if id == :all
         @hibernate_session.create_criteria(entity_name).list.to_a
@@ -46,7 +46,7 @@ module Ribs
     end
 
     # LOW LEVEL - shouldn't be used except by Ribs
-    def save(obj)
+    def save(obj) # :nodoc:
       chk_conn
       tx = @hibernate_session.begin_transaction
       if obj.__ribs_meat.persistent
@@ -60,7 +60,7 @@ module Ribs
     end
 
     # LOW LEVEL - shouldn't be used except by Ribs
-    def delete(obj)
+    def delete(obj) # :nodoc:
       chk_conn
       tx = @hibernate_session.begin_transaction
       @hibernate_session.delete(obj)
@@ -69,19 +69,19 @@ module Ribs
     end
     
     # LOW LEVEL - shouldn't be used except by Ribs
-    def meta_data
+    def meta_data # :nodoc:
       chk_conn
       @hibernate_session.connection.meta_data
     end
     
     # LOW LEVEL - shouldn't be used except by Ribs
-    def ddl(string)
+    def ddl(string) # :nodoc:
       chk_conn
       execute(string)
     end
     
     # LOW LEVEL - shouldn't be used except by Ribs
-    def insert(template, *data)
+    def insert(template, *data) # :nodoc:
       chk_conn
       conn = @hibernate_session.connection
       stmt = conn.prepare_statement(template)
@@ -101,7 +101,7 @@ module Ribs
     end
 
     # LOW LEVEL - shouldn't be used except by Ribs
-    def select(string)
+    def select(string) # :nodoc:
       chk_conn
       conn = @hibernate_session.connection
       stmt = conn.create_statement

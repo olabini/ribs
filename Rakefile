@@ -32,7 +32,7 @@ task :spec => [:ant]
 desc 'Generate RDoc'
 Rake::RDocTask.new do |task|
   task.main = 'README'
-  task.title = 'xample'
+  task.title = 'ribs'
   task.rdoc_dir = 'doc'
   task.options << "--line-numbers" << "--inline-source"
   task.rdoc_files.include('README', 'lib/**/*.rb')
@@ -51,7 +51,7 @@ specification = Gem::Specification.new do |s|
 
   s.has_rdoc = true
   s.extra_rdoc_files = ['README']
-  s.rdoc_options << '--title' << 'xample' << '--main' << 'README' << '--line-numbers'
+  s.rdoc_options << '--title' << 'ribs' << '--main' << 'README' << '--line-numbers'
 
   s.email = 'ola.bini@gmail.com'
   s.files = FileList['{lib,test}/**/*.{rb,jar}', '[A-Z]*$', 'Rakefile'].to_a

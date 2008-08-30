@@ -2,7 +2,7 @@ require File.join(File.dirname(__FILE__), 'test_helper')
 
 class Track
   Ribs! do |rib|
-    rib.table = :DB_TRACK
+    rib.table :DB_TRACK
     
     rib.primary_key :TRACK_ID
 
