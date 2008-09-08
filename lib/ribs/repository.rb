@@ -42,6 +42,14 @@ module Ribs
   #
   # A Repository is a combination implementation of both Data Mapper and Repository.
   module Repository
+    module ClassMethods
+      include Repository
+    end
+    
+    module InstanceMethods
+      include Repository
+    end
+    
     attr_reader :database
     attr_reader :model
     
@@ -57,7 +65,7 @@ module Ribs
                  end
           
           unless mod1.kind_of?(Repository)
-            mod1.send :include, Repository
+            mod1.send :include, Repository::InstanceMethods
           end
 
           unless mod1.constants.include?("ClassMethods")
@@ -66,7 +74,7 @@ module Ribs
           
           cls.send :include, mod1
           cls.send :extend, mod1.const_get(:ClassMethods)
-          cls.send :extend, Repository
+          cls.send :extend, Repository::ClassMethods
           cls.instance_variable_set :@database, db
           cls.instance_variable_set :@model, real
         end
