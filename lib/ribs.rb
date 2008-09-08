@@ -25,6 +25,7 @@ require 'ribs/db'
 require 'ribs/definition'
 require 'ribs/handle'
 require 'ribs/meat'
+require 'ribs/repository'
 require 'ribs/core_ext/time'
 
 # The Ribs module includes most functionality needed for Ribs. The
