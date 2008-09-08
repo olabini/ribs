@@ -23,7 +23,7 @@ require 'bigdecimal'
 
 require 'ribs/db'
 require 'ribs/definition'
-require 'ribs/session'
+require 'ribs/handle'
 require 'ribs/meat'
 require 'ribs/core_ext/time'
 
@@ -34,21 +34,21 @@ require 'ribs/core_ext/time'
 module Ribs
   class << self
 
-    # The with_session method provides an easy way of working with a
-    # low level Ribs session. It will get a session for the database
-    # in question, yield that session to the block and then release
-    # the session when finished. This should generally not be needed,
+    # The with_handle method provides an easy way of working with a
+    # low level Ribs Handle. It will get a handle for the database
+    # in question, yield that handle to the block and then release
+    # the handle when finished. This should generally not be needed,
     # but wrapping a block if code with this method is a good way of
-    # opening a session and make sure it doesn't get fully closed
+    # opening a handle and make sure it doesn't get fully closed
     # until after the block.
     # 
-    # +from+ decides which database definition to get a session for.
+    # +from+ decides which database definition to get a handle for.
     #
-    def with_session(from = :default)
-      s = Ribs::Session.get(from)
-      yield s
+    def with_handle(from = :default)
+      h = Ribs::Handle.get(from)
+      yield h
     ensure
-      s.release
+      h.release
     end
   end
 end

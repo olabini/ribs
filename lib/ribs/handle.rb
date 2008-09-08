@@ -1,26 +1,26 @@
 module Ribs
-  # A Ribs session maps many-to-one with a Hibernate session. When
-  # there are no more Ribs sessions left, the Hibernate session will
+  # A Ribs handle maps many-to-one with a Hibernate session. When
+  # there are no more Ribs handles left, the Hibernate session will
   # be released too.
   #
-  # The methods in Session is not to be used outside the framework in
+  # The methods in Handle is not to be used outside the framework in
   # most cases, since they are internal, brittle, not based on
   # Hibernate in all cases, and very much subject to change. Currently
   # they provide capabilities that aren't part of the framework yet,
   # such as migrations and setting up test data.
   #
-  class Session
-    # This error is thrown when an operation on a session is
+  class Handle
+    # This error is thrown when an operation on a handle is
     # attempted but the internal Hibernate session has already
     # been closed.
     #
     class NotConnectedError < StandardError;end
 
     class << self
-      # Returns a session object from the database +from+. The
+      # Returns a handle object from the database +from+. The
       # available values for from is either one of the existing
       # defined database names, or <tt>:default</tt>, which will give
-      # a session to the default database.
+      # a handle to the default database.
       #
       def get(from = :default)
         db = case from
@@ -31,14 +31,14 @@ module Ribs
              else
                Ribs::DB::get(from)
              end
-        db.session
+        db.handle
       end
     end
     
-    # The current database for this session
+    # The current database for this handle
     attr_reader :db
     
-    # Creates a new session that points to the provided +db+ and
+    # Creates a new handle that points to the provided +db+ and
     # +hibernate_session+
     #
     def initialize(db, hibernate_session)
@@ -47,7 +47,7 @@ module Ribs
       @hibernate_session = hibernate_session
     end
     
-    # Releases this session from the database.  This will possibly
+    # Releases this handle from the database.  This will possibly
     # result in closing the internal Hibernate session, if this is the
     # last Ribs session pointing to that Hibernate session.
     def release

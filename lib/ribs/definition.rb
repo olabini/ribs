@@ -27,15 +27,15 @@ module Ribs
     # with a specified id, or if +id_or_sym+ is <tt>:all</tt> returns
     # all instances of this model.
     def find(id_or_sym)
-      Ribs.with_session do |s|
-        s.find(self.ribs_metadata.persistent_class.entity_name, id_or_sym)
+      Ribs.with_handle do |h|
+        h.find(self.ribs_metadata.persistent_class.entity_name, id_or_sym)
       end
     end
 
     # Destroys the model with the id +id+.
     def destroy(id)
-      Ribs.with_session do |s|
-        s.delete(find(id))
+      Ribs.with_handle do |h|
+        h.delete(find(id))
       end
     end
     
@@ -61,16 +61,16 @@ module Ribs
     # exists, it will update the database, otherwise it will create
     # it.
     def save
-      Ribs.with_session do |s|
-        s.save(self)
+      Ribs.with_handle do |h|
+        h.save(self)
       end
     end
     
     # Removes this instance from the database.
     def destroy!
       __ribs_meat.destroyed = true
-      Ribs.with_session do |s|
-        s.delete(self)
+      Ribs.with_handle do |h|
+        h.delete(self)
       end
     end
   end
@@ -184,9 +184,9 @@ module Ribs
       rm.rib = rib
 
       db = nil
-      with_session(options[:db] || :default) do |s|
-        db = s.db
-        m = s.meta_data
+      with_handle(options[:db] || :default) do |h|
+        db = h.db
+        m = h.meta_data
         name = rib.table || table_name_for(on.name, m)
 
         tables = m.get_tables nil, nil, name.to_s, %w(TABLE VIEW ALIAS SYNONYM).to_java(:String)

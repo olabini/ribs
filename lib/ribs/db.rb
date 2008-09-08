@@ -157,26 +157,26 @@ module Ribs
       @session_factory = @configuration.build_session_factory
     end
     
-    # Fetch a new Ribs session connected to the this database. Returns
-    # a Ribs::Session object.
-    def session
+    # Fetch a new Ribs handle connected to the this database. Returns
+    # a Ribs::Handle object.
+    def handle
       sessions = (Thread.current[:ribs_db_sessions] ||= {})
       if curr = sessions[self.object_id]
         curr[1] += 1 #reference count
-        Session.new(self, curr[0])
+        Handle.new(self, curr[0])
       else
         sess = @session_factory.open_session
         sessions[self.object_id] = [sess,1]
-        Session.new(self, sess)
+        Handle.new(self, sess)
       end
     end
     
-    # Release a Ribs::Session object that is connected to this
-    # database. That Session object should not be used after this
+    # Release a Ribs::Handle object that is connected to this
+    # database. That Handle object should not be used after this
     # method has been invoked.
-    def release(session)
+    def release(handle)
       res = Thread.current[:ribs_db_sessions][self.object_id]
-      if res[0] == session.hibernate_session
+      if res[0] == handle.hibernate_session
         res[1] -= 1
         if res[1] == 0
           res[0].close
