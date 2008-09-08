@@ -22,20 +22,26 @@ module Ribs
       val.save
       val
     end
-    
-    # Depending on the value of +id_or_sym+, tries to find the model
-    # with a specified id, or if +id_or_sym+ is <tt>:all</tt> returns
-    # all instances of this model.
-    def find(id_or_sym)
+
+    # Will get the instance with +id+ or return nil if no such entity
+    # exists.
+    def get(id)
       Ribs.with_handle do |h|
-        h.find(self.ribs_metadata.persistent_class.entity_name, id_or_sym)
+        h.get(self.ribs_metadata.persistent_class.entity_name, id)
+      end
+    end
+    
+    # Returns all instances of this model
+    def all
+      Ribs.with_handle do |h|
+        h.all(self.ribs_metadata.persistent_class.entity_name)
       end
     end
 
     # Destroys the model with the id +id+.
     def destroy(id)
       Ribs.with_handle do |h|
-        h.delete(find(id))
+        h.delete(get(id))
       end
     end
     

@@ -6,6 +6,20 @@ Helper to create model objects:
 
 model_from_database :Track
 
+
+- Ribs should allow advanced functionality such as Unit of Work, Repository, Data Mapper, but also scale down to Active Record level
+- Add a Repository type that also includes Data Mapper functionality.
+ - This will be specialized for each database and then for each type:
+  repository(:default, Artist).all
+
+ A repository for a specific combination will always be accessible, so you can add specific types:
+class Ribs::Repository::DEFAULT::Artist
+end
+
+   what you get back from the repository method will always be the same instance, since the class will actually be a singleton.
+   The actual real repository instance will be a subclass of the Ribs::Repository class.
+
+
+
 - Add default values
 - Add default value to avoid so that AVOID values can be used for NOT NULL
-- Don't use "find". Use "get" and "all" from DataMapper

@@ -62,15 +62,17 @@ module Ribs
     end
     
     # LOW LEVEL - shouldn't be used except by Ribs
-    def find(entity_name, id) # :nodoc:
+    def get(entity_name, id) # :nodoc:
       chk_conn
-      if id == :all
-        @hibernate_session.create_criteria(entity_name).list.to_a
-      else
-        @hibernate_session.get(entity_name, java.lang.Integer.new(id))
-      end
+      @hibernate_session.get(entity_name, java.lang.Integer.new(id))
     end
 
+    # LOW LEVEL - shouldn't be used except by Ribs
+    def all(entity_name) # :nodoc:
+      chk_conn
+      @hibernate_session.create_criteria(entity_name).list.to_a
+    end
+    
     # LOW LEVEL - shouldn't be used except by Ribs
     def save(obj) # :nodoc:
       chk_conn

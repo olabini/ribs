@@ -6,15 +6,15 @@ end
 
 describe Artist do 
   it "should be able to find all artists" do 
-    Artist.find(:all).length.should == 3
+    Artist.all.length.should == 3
   end
 
   it "should return correct value and type for id property" do 
-    Artist.find(:all).map { |a| a.id }.sort.should == [1,2,3]
+    Artist.all.map { |a| a.id }.sort.should == [1,2,3]
   end
   
   it "should return correct value and type for name property" do 
-    Artist.find(:all).map { |a| a.name }.sort.should == ["David Bowie","New Model Army","Public Image Ltd"]
+    Artist.all.map { |a| a.name }.sort.should == ["David Bowie","New Model Army","Public Image Ltd"]
   end
   
   it "should only have the appropriate methods defined" do 
@@ -28,7 +28,7 @@ describe Artist do
       artist.id = 4
       artist.name = "Assemblage 23"
       artist.save
-      artist2 = Artist.find(4)
+      artist2 = Artist.get(4)
       artist2.should_not be_nil
       artist2.id.should == 4
       artist2.name.should == "Assemblage 23"
@@ -41,7 +41,7 @@ describe Artist do
     begin
       artist = Artist.new :id => 4, :name => "Assemblage 23"
       artist.save
-      artist2 = Artist.find(4)
+      artist2 = Artist.get(4)
       artist2.should_not be_nil
       artist2.id.should == 4
       artist2.name.should == "Assemblage 23"
@@ -53,7 +53,7 @@ describe Artist do
   it "should be possible to create a new instance by using create" do 
     begin
       Artist.create :id => 4, :name => "Assemblage 23"
-      artist = Artist.find(4)
+      artist = Artist.get(4)
       artist.should_not be_nil
       artist.id.should == 4
       artist.name.should == "Assemblage 23"
@@ -64,11 +64,11 @@ describe Artist do
   
   it "should be possible to update name property on existing bean" do 
     begin
-      artist = Artist.find(2)
+      artist = Artist.get(2)
       artist.name = "U2"
-      Artist.find(2).name.should == "New Model Army"
+      Artist.get(2).name.should == "New Model Army"
       artist.save
-      Artist.find(2).name.should == "U2"
+      Artist.get(2).name.should == "U2"
     ensure
       reset_database!
     end
@@ -76,8 +76,8 @@ describe Artist do
 
   it "should be possible to delete existing bean" do 
     begin
-      Artist.find(2).destroy!
-      Artist.find(2).should be_nil
+      Artist.get(2).destroy!
+      Artist.get(2).should be_nil
     ensure
       reset_database!
     end
@@ -86,7 +86,7 @@ describe Artist do
   it "should be possible to delete existing bean by id" do 
     begin
       Artist.destroy(2)
-      Artist.find(2).should be_nil
+      Artist.get(2).should be_nil
     ensure
       reset_database!
     end
