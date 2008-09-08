@@ -59,16 +59,16 @@ describe Ribs::Repository do
   end
 
   it 'should return a Repository class for a model with another db' do 
-    R(FakeModel, :flux).should == Ribs::Repository::DB_flux::FakeModel
-    R(FakeModel, :flux).model.should == ::FakeModel
-    R(FakeModel, :flux).database.should == :flux
+    R(FakeModel, :flarg).should == Ribs::Repository::DB_flarg::FakeModel
+    R(FakeModel, :flarg).model.should == ::FakeModel
+    R(FakeModel, :flarg).database.should == :flarg
   end
   
   it 'should return an instance of the Repository class for a model instance with another db' do 
     ff = FakeModel.new
-    R(ff, :flux).should be_kind_of(Ribs::Repository::DB_flux::FakeModel)
-    R(ff, :flux).model.should == ff
-    R(ff, :flux).database.should == :flux
+    R(ff, :flarg).should be_kind_of(Ribs::Repository::DB_flarg::FakeModel)
+    R(ff, :flarg).model.should == ff
+    R(ff, :flarg).database.should == :flarg
   end
   
   it 'should handle submodules correctly' do 

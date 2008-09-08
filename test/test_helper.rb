@@ -23,10 +23,54 @@ Ribs::DB.define do |db|
 #   db.properties['hibernate.show_sql'] = 'true'
 end
 
+Ribs::DB.define(:flarg) do |db|
+  db.dialect = 'Derby'
+  db.uri = 'jdbc:derby:test_database_flarg;create=true'
+  db.driver = 'org.apache.derby.jdbc.EmbeddedDriver'
+end
+
+Ribs::DB.define(:flurg) do |db|
+  db.dialect = 'Derby'
+  db.uri = 'jdbc:derby:test_database_flurg;create=true'
+  db.driver = 'org.apache.derby.jdbc.EmbeddedDriver'
+end
+
 def reset_database!
+  Ribs.with_handle(:flarg) do |h|
+    h.ddl "DROP TABLE FAKEMODEL" rescue nil
+    h.ddl "DROP TABLE FAKEMODEL_FAKESECONDMODEL" rescue nil
+    h.ddl <<SQL
+CREATE TABLE FAKEMODEL (
+  ID INT NOT NULL
+)
+SQL
+    h.ddl <<SQL
+CREATE TABLE FAKEMODEL_FAKESECONDMODEL (
+  ID INT NOT NULL
+)
+SQL
+  end
+
+  Ribs.with_handle(:flurg) do |h|
+    h.ddl "DROP TABLE FAKEMODEL" rescue nil
+    h.ddl "DROP TABLE FAKEMODEL_FAKESECONDMODEL" rescue nil
+    h.ddl <<SQL
+CREATE TABLE FAKEMODEL (
+  ID INT NOT NULL
+)
+SQL
+    h.ddl <<SQL
+CREATE TABLE FAKEMODEL_FAKESECONDMODEL (
+  ID INT NOT NULL
+)
+SQL
+  end
+
   Ribs.with_handle do |h|
     h.ddl "DROP TABLE DB_TRACK" rescue nil
     h.ddl "DROP TABLE ARTIST" rescue nil
+    h.ddl "DROP TABLE FAKEMODEL" rescue nil
+    h.ddl "DROP TABLE FAKEMODEL_FAKESECONDMODEL" rescue nil
 
     # GENERATED ALWAYS AS IDENTITY
     # Add new columns for TIMESTAMP, BINARY, DECIMAL, FLOAT, BOOLEAN
@@ -56,6 +100,17 @@ CREATE TABLE ARTIST (
   PRIMARY KEY (ID)
 )
 SQL
+
+    h.ddl <<SQL
+CREATE TABLE FAKEMODEL (
+  ID INT NOT NULL
+)
+SQL
+    h.ddl <<SQL
+CREATE TABLE FAKEMODEL_FAKESECONDMODEL (
+  ID INT NOT NULL
+)
+SQL
     
     template = <<SQL
 INSERT INTO DB_TRACK(TRACK_ID, title, filePath, playTime, added, volume, lastPlayed, data, description, fraction, otherFraction, good, price) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -79,5 +134,7 @@ reset_database!
 at_exit do 
   require 'fileutils'
   FileUtils.rm_rf('test_database')
+  FileUtils.rm_rf('test_database_flarg')
+  FileUtils.rm_rf('test_database_flurg')
   FileUtils.rm_rf('derby.log')
 end

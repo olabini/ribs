@@ -31,7 +31,8 @@ module Ribs
 
     return cls if obj.kind_of?(Class)
 
-    ret = cls.new
+    ret = cls.allocate
+    ret.send :initialize
     ret.instance_variable_set :@database, db
     ret.instance_variable_set :@model, obj
     ret
@@ -44,10 +45,97 @@ module Ribs
   module Repository
     module ClassMethods
       include Repository
+
+      def metadata
+        @metadata
+      end
+      
+      def persistent(obj)
+        (@persistent ||= {})[obj.object_id] = true
+      end
+      
+      def persistent?(obj)
+        @persistent && @persistent[obj.object_id]
+      end
+
+      def destroyed(obj)
+        (@destroyed ||= {})[obj.object_id] = true
+      end
+      
+      def destroyed?(obj)
+        @destroyed && @destroyed[obj.object_id]
+      end
+
+      # Create a new instance of this model object, optionally setting
+      # properties based on +attrs+.
+      def new(attrs = {})
+        obj = self.model.new
+        attrs.each do |k,v|
+          obj.send("#{k}=", v)
+        end
+        obj
+      end
+
+      # First creates a model object based on the values in +attrs+ and
+      # then saves this to the database directly.
+      def create(attrs = {})
+        val = new(attrs)
+        R(val, self.database).save
+        val
+      end
+      
+      # Returns all instances for the current model
+      def all
+        Ribs.with_handle(self.database) do |h|
+          h.all(self.metadata.persistent_class.entity_name)
+        end
+      end
+
+      # Will get the instance with +id+ or return nil if no such entity
+      # exists.
+      def get(id)
+        Ribs.with_handle(self.database) do |h|
+          h.get(self.metadata.persistent_class.entity_name, id)
+        end
+      end
+
+      # Destroys the model with the id +id+.
+      def destroy(id)
+        Ribs.with_handle(self.database) do |h|
+          h.delete(get(id))
+        end
+      end
     end
     
     module InstanceMethods
       include Repository
+      
+      def metadata
+        self.class.metadata
+      end
+
+      # Removes this instance from the database.
+      def destroy!
+        self.class.destroyed(self.model)
+        Ribs.with_handle(self.database) do |h|
+          h.delete(self.model)
+        end
+      end
+
+      # Saves this instance to the database. If the instance already
+      # exists, it will update the database, otherwise it will create
+      # it.
+      def save
+        Ribs.with_handle(self.database) do |h|
+          if self.class.persistent?(self.model)
+            h.update_obj(self.model)
+          else
+            h.insert_obj(self.model)
+            self.class.persistent(self.model)
+          end
+        end
+        self.model
+      end
     end
     
     attr_reader :database
@@ -77,6 +165,7 @@ module Ribs
           cls.send :extend, Repository::ClassMethods
           cls.instance_variable_set :@database, db
           cls.instance_variable_set :@model, real
+          cls.instance_variable_set :@metadata, Ribs::metadata_for(db, real, cls)
         end
       end
 

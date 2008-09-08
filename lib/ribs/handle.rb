@@ -88,6 +88,24 @@ module Ribs
     end
 
     # LOW LEVEL - shouldn't be used except by Ribs
+    def update_obj(obj) # :nodoc:
+      chk_conn
+      tx = @hibernate_session.begin_transaction
+      @hibernate_session.update(obj)
+      tx.commit
+      obj
+    end
+
+    # LOW LEVEL - shouldn't be used except by Ribs
+    def insert_obj(obj) # :nodoc:
+      chk_conn
+      tx = @hibernate_session.begin_transaction
+      @hibernate_session.save(obj)
+      tx.commit
+      obj
+    end
+    
+    # LOW LEVEL - shouldn't be used except by Ribs
     def delete(obj) # :nodoc:
       chk_conn
       tx = @hibernate_session.begin_transaction

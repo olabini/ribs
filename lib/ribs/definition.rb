@@ -1,4 +1,24 @@
 module Ribs
+  @ribs = {}
+
+  class << self
+    def metadata(db, model)
+      @ribs[[db, model]] || @ribs[model]
+    end
+
+    def metadata_for(db, model, from)
+      if (v = metadata(db, model))
+        return v
+      end
+
+      metadata = Ribs::MetaData.new
+      define_ribs(model, :db => db, :no_accessors => true, :metadata => metadata, :from => from)
+
+      @ribs[[db, model]] = metadata
+      metadata
+    end
+  end
+
   # Ribs::ClassMethods contains all the methods that gets mixed in to
   # a model class.
   module ClassMethods
@@ -164,12 +184,21 @@ module Ribs
     
     def initialize(*args)
       super
+      @data = {}
+    end
+    
+    def []=(key, value)
+      @data[key] = value
     end
     
     # Get the Ruby class. Implementation of the WithRubyClass
     # interface.
     def getRubyClass
       @ruby_class
+    end
+    
+    def getRubyData(key)
+      @data[key]
     end
   end
   
@@ -185,8 +214,11 @@ module Ribs
       rib = Rib.new
       yield rib if block_given?
        
-      define_metadata_on_class on
-      rm = on.ribs_metadata
+      unless options[:metadata]
+        define_metadata_on_class on
+        options[:metadata] = on.ribs_metadata
+      end
+      rm = options[:metadata]
       rm.rib = rib
 
       db = nil
@@ -228,6 +260,7 @@ module Ribs
           pc.add_tuplizer(org.hibernate.EntityMode::MAP, "org.jruby.ribs.RubyTuplizer")
           
           rm.persistent_class = pc
+          rm.persistent_class["meatspace"] = options[:from] if options[:from]
           
           table.column_iterator.each do |c|
             unless rib.to_avoid.include?(c.name.downcase)
@@ -246,7 +279,7 @@ module Ribs
                 pc.add_property(prop)
               end
               
-              define_meat_accessor(on, prop.name)
+              define_meat_accessor(on, prop.name) unless options[:no_accessors]
             end
           end
           pc.create_primary_key
@@ -311,6 +344,7 @@ CODE
     # Tries to figure out if a table name should be in lower case or
     # upper case, and returns the table name based on that.
     def table_name_for(str, metadata)
+      str = str.gsub(/::/, '_')
       if metadata.stores_lower_case_identifiers
         str.downcase
       elsif metadata.stores_upper_case_identifiers
