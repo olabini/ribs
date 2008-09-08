@@ -16,8 +16,10 @@ describe Ribs::Repository do
     Ribs::Repository::DB_default.constants.should include("FakeModel")
     Ribs::Repository::DB_default::FakeModel.class.should == Class
     Ribs::Repository::DB_default::FakeModel.ancestors.should include(Ribs::Repository)
+    Ribs::Repository::DB_default::FakeModel.ancestors.should include(Ribs::Repository::InstanceMethods)
     Ribs::Repository::DB_default::FakeModel.ancestors.should include(Ribs::Repository::FakeModel)
     (class << Ribs::Repository::DB_default::FakeModel; self; end).ancestors.should include(Ribs::Repository)
+    (class << Ribs::Repository::DB_default::FakeModel; self; end).ancestors.should include(Ribs::Repository::ClassMethods)
     (class << Ribs::Repository::DB_default::FakeModel; self; end).ancestors.should include(Ribs::Repository::FakeModel::ClassMethods)
   end
 
@@ -25,8 +27,10 @@ describe Ribs::Repository do
     Ribs::Repository::DB_flarg.constants.should include("FakeModel")
     Ribs::Repository::DB_flarg::FakeModel.class.should == Class
     Ribs::Repository::DB_flarg::FakeModel.ancestors.should include(Ribs::Repository)
+    Ribs::Repository::DB_flarg::FakeModel.ancestors.should include(Ribs::Repository::InstanceMethods)
     Ribs::Repository::DB_flarg::FakeModel.ancestors.should include(Ribs::Repository::FakeModel)
     (class << Ribs::Repository::DB_flarg::FakeModel; self; end).ancestors.should include(Ribs::Repository)
+    (class << Ribs::Repository::DB_flarg::FakeModel; self; end).ancestors.should include(Ribs::Repository::ClassMethods)
     (class << Ribs::Repository::DB_flarg::FakeModel; self; end).ancestors.should include(Ribs::Repository::FakeModel::ClassMethods)
   end
   
