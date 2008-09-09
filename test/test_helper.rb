@@ -20,6 +20,7 @@ Ribs::DB.define do |db|
   db.dialect = 'Derby'
   db.uri = 'jdbc:derby:test_database;create=true'
   db.driver = 'org.apache.derby.jdbc.EmbeddedDriver'
+  db.default = true
 #   db.properties['hibernate.show_sql'] = 'true'
 end
 

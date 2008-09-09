@@ -1,25 +1,9 @@
 - Think about unit of work
-- Refactor to be repository based instead - NOTHING related to the database should be saved in the model.
-  This means doing away with getters and setters automatically created, it means doing away with finders and creators and stuff on the class. All this should be in the Repository implementation. The Ribs definition can still be in the object - but it's not necessary. The repository creates a mapping from scratch with guesses, from the database, if no ribs definition is there. You can have several Ribs definitions for different repositories. They can be inherited so you can avoid or add something just specifically for another database. The repository instances contain information about if something has been created or not, etc.
-db and repository are different things. DB is the low level database connection
-Helper to create model objects:
+
+- Helper to create model objects:
 
 model_from_database :Track
 
-
 - Ribs should allow advanced functionality such as Unit of Work, Repository, Data Mapper, but also scale down to Active Record level
-- Add a Repository type that also includes Data Mapper functionality.
- - This will be specialized for each database and then for each type:
-  repository(:default, Artist).all
-
- A repository for a specific combination will always be accessible, so you can add specific types:
-class Ribs::Repository::DEFAULT::Artist
-end
-
-   what you get back from the repository method will always be the same instance, since the class will actually be a singleton.
-   The actual real repository instance will be a subclass of the Ribs::Repository class.
-
-
-
 - Add default values
 - Add default value to avoid so that AVOID values can be used for NOT NULL

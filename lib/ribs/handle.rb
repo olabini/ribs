@@ -74,20 +74,6 @@ module Ribs
     end
     
     # LOW LEVEL - shouldn't be used except by Ribs
-    def save(obj) # :nodoc:
-      chk_conn
-      tx = @hibernate_session.begin_transaction
-      if obj.__ribs_meat.persistent
-        @hibernate_session.update(obj)
-      else
-        @hibernate_session.save(obj)
-        obj.__ribs_meat.persistent = true
-      end
-      tx.commit
-      obj
-    end
-
-    # LOW LEVEL - shouldn't be used except by Ribs
     def update_obj(obj) # :nodoc:
       chk_conn
       tx = @hibernate_session.begin_transaction

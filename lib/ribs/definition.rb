@@ -6,101 +6,25 @@ module Ribs
       @ribs[[db, model]] || @ribs[model]
     end
 
+    def add_metadata_for(db, model, metadata)
+      if db
+        @ribs[[db, model]] = metadata
+      else
+        @ribs[model] = metadata
+      end
+    end
+    
     def metadata_for(db, model, from)
       if (v = metadata(db, model))
         return v
       end
 
       metadata = Ribs::MetaData.new
-      define_ribs(model, :db => db, :no_accessors => true, :metadata => metadata, :from => from)
-
-      @ribs[[db, model]] = metadata
+      define_ribs(model, :db => db, :metadata => metadata, :from => from)
       metadata
     end
   end
 
-  # Ribs::ClassMethods contains all the methods that gets mixed in to
-  # a model class.
-  module ClassMethods
-    # Get the metadata for the current model
-    attr_reader :ribs_metadata
-
-    # Create a new instance of this model object, optionally setting
-    # properties based on +attrs+.
-    def new(attrs = {})
-      obj = super()
-      attrs.each do |k,v|
-        obj.send("#{k}=", v)
-      end
-      obj
-    end
-
-    # First creates a model object based on the values in +attrs+ and
-    # then saves this to the database directly.
-    def create(attrs = {})
-      val = new(attrs)
-      val.save
-      val
-    end
-
-    # Will get the instance with +id+ or return nil if no such entity
-    # exists.
-    def get(id)
-      Ribs.with_handle do |h|
-        h.get(self.ribs_metadata.persistent_class.entity_name, id)
-      end
-    end
-    
-    # Returns all instances of this model
-    def all
-      Ribs.with_handle do |h|
-        h.all(self.ribs_metadata.persistent_class.entity_name)
-      end
-    end
-
-    # Destroys the model with the id +id+.
-    def destroy(id)
-      Ribs.with_handle do |h|
-        h.delete(get(id))
-      end
-    end
-    
-    
-    # TODO: add inspect here
-  end
-  
-  # Ribs::InstanceMethods provides the methods that gets mixed in to
-  # all instances of a model object.
-  module InstanceMethods
-    # Returns the Meat instance for this instance.
-    def __ribs_meat
-      @__ribs_meat ||= Ribs::Meat.new(self)
-    end
-        
-    # Returns an inspection based on current values of the data in the
-    # database.
-    def inspect
-      "#<#{self.class.name}: #{self.__ribs_meat.properties.inspect}>"
-    end
-    
-    # Saves this instance to the database. If the instance already
-    # exists, it will update the database, otherwise it will create
-    # it.
-    def save
-      Ribs.with_handle do |h|
-        h.save(self)
-      end
-    end
-    
-    # Removes this instance from the database.
-    def destroy!
-      __ribs_meat.destroyed = true
-      Ribs.with_handle do |h|
-        h.delete(self)
-      end
-    end
-  end
-  
   # Collects all the meta data about a specific Ribs model
   class MetaData
     # The table to connect to
@@ -215,12 +139,18 @@ module Ribs
       yield rib if block_given?
        
       unless options[:metadata]
-        define_metadata_on_class on
-        options[:metadata] = on.ribs_metadata
+        options[:metadata] = Ribs::MetaData.new      
       end
-      rm = options[:metadata]
-      rm.rib = rib
 
+      rm = options[:metadata]
+      Ribs::add_metadata_for(options[:db], on, rm)
+
+      unless options[:from]
+        options[:from] = R(on, options[:db] || :default)
+      end
+
+      rm.rib = rib
+      
       db = nil
       with_handle(options[:db] || :default) do |h|
         db = h.db
@@ -278,8 +208,6 @@ module Ribs
               else
                 pc.add_property(prop)
               end
-              
-              define_meat_accessor(on, prop.name) unless options[:no_accessors]
             end
           end
           pc.create_primary_key
@@ -296,21 +224,6 @@ module Ribs
     JTypes = java.sql.Types
     
     private
-    # Defines the actual accessor for a specific property on a
-    # class. This will define methods that use the Meat to get data.
-    def define_meat_accessor(clazz, name)
-      downcased = name.downcase
-      clazz.class_eval <<CODE
-  def #{downcased}
-    self.__ribs_meat[:"#{name}"]
-  end
-
-  def #{downcased}=(value)
-    self.__ribs_meat[:"#{name}"] = value
-  end
-CODE
-    end
-
     # Returns the Java type for a specific combination of a type name
     # and an SQL type code
     def get_type_for_sql(name, code)
@@ -351,18 +264,6 @@ CODE
         str.upcase!
       else
         str
-      end
-    end
-    
-    # Defines the meta data information on a class, and mixes in
-    # ClassMethods and InstanceMethods to it.
-    def define_metadata_on_class(clazz)
-      clazz.instance_variable_set :@ribs_metadata, Ribs::MetaData.new
-      class << clazz
-        include ClassMethods
-      end
-      clazz.class_eval do 
-        include InstanceMethods
       end
     end
   end
