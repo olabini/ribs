@@ -18,5 +18,4 @@ Feature plan for Ribs
 - Should be possible to have value classes as part of definition
 - Should be able to handle subtyping
 - Should have a migration feature
-- Should setting/getting use the property methods?
 - Add phases to database definitions (as Rails environments)
