@@ -51,6 +51,25 @@ module Ribs
     ensure
       h.release
     end
+
+    # Defines a model with the given name, defining attribute
+    # accessors and also providing the Ribs mapping from the block
+    def define_model(name, options = {}, &block)
+      base = Object
+      cls = Class.new
+      names = name.to_s.split(/::/)
+      names[0..-2].each do |nm|
+        if !base.constants.include?(nm)
+          base.const_set nm, Module.new
+        end
+        base = base.const_get nm
+      end
+      base.const_set names.last, cls
+
+      Ribs!({:on => cls}.merge(options), &block)
+      R(cls).define_accessors
+      cls
+    end
   end
 end
 

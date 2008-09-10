@@ -49,6 +49,12 @@ module Ribs
       def metadata
         @metadata
       end
+
+      def define_accessors
+        self.metadata.properties.each do |name, _|
+          self.model.send :attr_accessor, name
+        end
+      end
       
       def persistent(obj)
         (@persistent ||= {})[obj.object_id] = true

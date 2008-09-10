@@ -30,10 +30,9 @@ class Track
     
     rib.avoid :filePath, :default => "fluxie"
   end
-  
-  # Could do:
-  # Ribs::attributes_from_ribs_on self
 end
+
+# R(Track).define_accessors
 
 describe Track do 
   it "should be able to find things based on mapped primary key" do

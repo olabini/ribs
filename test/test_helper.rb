@@ -70,6 +70,8 @@ SQL
   Ribs.with_handle do |h|
     h.ddl "DROP TABLE DB_TRACK" rescue nil
     h.ddl "DROP TABLE ARTIST" rescue nil
+    h.ddl "DROP TABLE person" rescue nil
+    h.ddl "DROP TABLE address" rescue nil
     h.ddl "DROP TABLE FAKEMODEL" rescue nil
     h.ddl "DROP TABLE FAKEMODEL_FAKESECONDMODEL" rescue nil
 
@@ -102,6 +104,27 @@ CREATE TABLE ARTIST (
 )
 SQL
 
+    h.ddl <<SQL
+CREATE TABLE person (
+  ID INT NOT NULL,
+  given_name VARCHAR(255),
+  sur_name VARCHAR(255) NOT NULL,
+  age INT NOT NULL,
+  PRIMARY KEY (ID)
+)
+SQL
+
+    h.ddl <<SQL
+CREATE TABLE address (
+  ID INT NOT NULL,
+  street VARCHAR(255),
+  postal VARCHAR(255),
+  zip VARCHAR(255),
+  country VARCHAR(255),
+  PRIMARY KEY (ID)
+)
+SQL
+    
     h.ddl <<SQL
 CREATE TABLE FAKEMODEL (
   ID INT NOT NULL
