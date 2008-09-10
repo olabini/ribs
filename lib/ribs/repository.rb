@@ -51,8 +51,8 @@ module Ribs
       end
 
       def define_accessors
-        self.metadata.properties.each do |name, _|
-          self.model.send :attr_accessor, name
+        self.metadata.properties_and_identity.each do |name, _|
+          self.model.send :attr_accessor, name.downcase
         end
       end
       

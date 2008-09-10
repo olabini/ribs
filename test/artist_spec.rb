@@ -1,6 +1,7 @@
 require File.join(File.dirname(__FILE__), 'test_helper')
 
 class Artist
+  Ribs! :identity_map => false
   attr_accessor :id
   attr_accessor :name
 end

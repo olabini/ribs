@@ -34,7 +34,13 @@ module Ribs
     attr_accessor :persistent_class
     # The Rib that defines all the mapping data
     attr_accessor :rib
+    # Should this object be saved in an identity map?
+    attr_accessor :identity_map
     
+    def identity_map?
+      self.identity_map
+    end
+
     # Return the property instance for the given +name+.
     def [](name)
       self.persistent_class.get_property(name.to_s) rescue nil
@@ -43,6 +49,16 @@ module Ribs
     # Return all the properties for this model.
     def properties
       self.persistent_class.property_iterator.to_a.inject({}) do |h, value|
+        if !value.respond_to?(:getRubyValue)
+          h[value.name] = value
+        end
+        h
+      end
+    end
+
+    # Return all the properties for this model.
+    def properties_and_identity
+      (self.persistent_class.property_iterator.to_a + [self.persistent_class.identifier_property]).inject({}) do |h, value|
         if !value.respond_to?(:getRubyValue)
           h[value.name] = value
         end
@@ -62,7 +78,7 @@ module Ribs
     attr_reader :to_avoid
     # List of default values for columns
     attr_reader :default_values
-
+    
     # Initializes object
     def initialize
       @columns = { }
@@ -174,6 +190,7 @@ module Ribs
 
       rm = options[:metadata]
       Ribs::add_metadata_for(options[:db], on, rm)
+      rm.identity_map = options.key?(:identity_map) ? options[:identity_map] : true
 
       unless options[:from]
         options[:from] = R(on, options[:db] || :default)
@@ -185,7 +202,8 @@ module Ribs
       with_handle(options[:db] || :default) do |h|
         db = h.db
         m = h.meta_data
-        name = rib.table || table_name_for(on.name, m)
+
+        name = table_name_for((rib.table || on.name), m)
 
         tables = m.get_tables nil, nil, name.to_s, %w(TABLE VIEW ALIAS SYNONYM).to_java(:String)
         if tables.next
@@ -299,11 +317,11 @@ module Ribs
     # Tries to figure out if a table name should be in lower case or
     # upper case, and returns the table name based on that.
     def table_name_for(str, metadata)
-      str = str.gsub(/::/, '_')
+      str = str.to_s.gsub(/::/, '_')
       if metadata.stores_lower_case_identifiers
         str.downcase
       elsif metadata.stores_upper_case_identifiers
-        str.upcase!
+        str.upcase
       else
         str
       end
