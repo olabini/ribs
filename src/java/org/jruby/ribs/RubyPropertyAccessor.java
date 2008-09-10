@@ -44,7 +44,14 @@ public class RubyPropertyAccessor implements PropertyAccessor {
 		return new Getter() {
 			public Object get(Object owner) throws HibernateException {
 				Ruby runtime = ((IRubyObject)owner).getRuntime();
-				IRubyObject rubyValue = ((IRubyObject)owner).callMethod(runtime.getCurrentContext(),propertyName.toLowerCase());
+                String name = propertyName.toLowerCase();
+                IRubyObject rubyValue;
+                if(((IRubyObject)owner).respondsTo(name)) {
+                    rubyValue = ((IRubyObject)owner).callMethod(runtime.getCurrentContext(),name);
+                } else {
+                    rubyValue = ((IRubyObject)owner).getInstanceVariables().getInstanceVariable("@" + name);
+                }
+
 				if(rubyValue instanceof RubyTime) {
 					return ((RubyTime)rubyValue).getJavaDate();
                 } else if(rubyValue instanceof RubyFixnum) {
@@ -111,8 +118,13 @@ public class RubyPropertyAccessor implements PropertyAccessor {
                         rubyObject = JavaUtil.convertJavaToRuby(runtime, value);
                     }
                     
-                    ((IRubyObject)target).callMethod(runtime.getCurrentContext(),propertyName.toLowerCase()+"=",
-                                                     new IRubyObject[] {rubyObject});
+                    String name = propertyName.toLowerCase();
+
+                    if(((IRubyObject)target).respondsTo(name + "=")) {
+                        ((IRubyObject)target).callMethod(runtime.getCurrentContext(),name + "=", rubyObject);
+                    } else {
+                        ((IRubyObject)target).getInstanceVariables().setInstanceVariable("@" + name, rubyObject);
+                    }
                 } catch(SQLException e) {
                     throw new HibernateException(e);
                 }

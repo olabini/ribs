@@ -12,7 +12,6 @@ class Track
   attr_accessor :is_good
   attr_accessor :full_price
   attr_accessor :volume
-  attr_accessor :otherfraction
 
   Ribs! do |rib|
     rib.table :DB_TRACK
@@ -66,8 +65,8 @@ describe Track do
       ['VOLUME', 'TITLE', 'PLAYTIME', 'ADDED', 'OTHERFRACTION', 'LASTPLAYED', 'DATA', 'DESCRIPTION', 'FRACTION', 'GOOD', 'PRICE'].sort
   end
   
-  it "should have correct value and type for OTHERFRACTION property" do 
-    res = R(Track).all.map { |a| a.otherfraction }.sort
+  it "should have correct value and type for OTHERFRACTION property from instance variable" do 
+    res = R(Track).all.map { |a| a.instance_variable_get :@otherfraction }.sort
     res[0].should be_close(5.7, 0.00001)
     res[1].should be_close(35435.4522234, 0.01)
   end
