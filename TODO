@@ -1,9 +1,9 @@
 - Think about unit of work
-
 - Helper to create model objects:
 
 model_from_database :Track
 
 - Ribs should allow advanced functionality such as Unit of Work, Repository, Data Mapper, but also scale down to Active Record level
-- Add default values
-- Add default value to avoid so that AVOID values can be used for NOT NULL
+- Add logging
+- More than one Ribs definition per model
+

@@ -79,7 +79,7 @@ SQL
 CREATE TABLE DB_TRACK (
   TRACK_ID INT NOT NULL,
   title VARCHAR(255) NOT NULL,
-  filePath VARCHAR(255),
+  filePath VARCHAR(255) NOT NULL,
   playTime TIME,
   added DATE,
   volume INT NOT NULL,

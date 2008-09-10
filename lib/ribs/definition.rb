@@ -43,7 +43,9 @@ module Ribs
     # Return all the properties for this model.
     def properties
       self.persistent_class.property_iterator.to_a.inject({}) do |h, value|
-        h[value.name] = value
+        if !value.respond_to?(:getRubyValue)
+          h[value.name] = value
+        end
         h
       end
     end
@@ -58,12 +60,15 @@ module Ribs
     attr_reader :primary_keys
     # List of all columns to avoid
     attr_reader :to_avoid
+    # List of default values for columns
+    attr_reader :default_values
 
     # Initializes object
     def initialize
       @columns = { }
       @primary_keys = { }
       @to_avoid = []
+      @default_values = { }
     end
     
     # Gets or sets the table name to work with. If +name+ is nil,
@@ -89,7 +94,17 @@ module Ribs
     
     # Avoids all the provided columns
     def avoid(*columns)
-      @to_avoid += columns.map{|s| s.to_s.downcase}
+      options = {}
+      if columns.last.kind_of?(Hash)
+        columns, options = columns[0..-2], columns.last
+      end
+      names = columns.map{|s| s.to_s.downcase}
+      @to_avoid += names
+      if options[:default]
+        names.each do |n|
+          @default_values[n] = options[:default]
+        end
+      end
     end
   end
   
@@ -123,6 +138,21 @@ module Ribs
     
     def getRubyData(key)
       @data[key]
+    end
+  end
+
+  class RubyValuedProperty < org.hibernate.mapping.Property
+    include org.jruby.ribs.WithRubyValue
+
+    # The Ruby class
+    attr_accessor :ruby_value
+    
+    def initialize(*args)
+      super
+    end
+    
+    def getRubyValue
+      @ruby_value
     end
   end
   
@@ -206,6 +236,18 @@ module Ribs
                 pc.identifier_property = prop
                 pc.identifier = val
               else
+                pc.add_property(prop)
+              end
+            else
+              if !c.nullable
+                prop = RubyValuedProperty.new
+                prop.ruby_value = rib.default_values[c.name.downcase]
+                prop.persistent_class = pc
+                prop.name = ((v=rib.columns[c.name.downcase]) && v[0]) || c.name
+                val = SimpleValue.new(table)
+                val.add_column(c)
+                val.type_name = get_type_for_sql(c.sql_type, c.sql_type_code)
+                prop.value = val
                 pc.add_property(prop)
               end
             end

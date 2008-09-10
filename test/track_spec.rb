@@ -28,7 +28,7 @@ class Track
     rib.col :good, :is_good
     rib.col :price, :full_price
     
-    rib.avoid :filePath
+    rib.avoid :filePath, :default => "fluxie"
   end
   
   # Could do:

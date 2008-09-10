@@ -11,6 +11,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.PropertyNotFoundException;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.SessionImplementor;
+import org.hibernate.mapping.Property;
 import org.hibernate.property.Getter;
 import org.hibernate.property.PropertyAccessor;
 import org.hibernate.property.Setter;
@@ -27,9 +28,13 @@ import org.jruby.util.ByteList;
 
 public class RubyPropertyAccessor implements PropertyAccessor {
     private Type type;
+    private Object defaultValue;
 
-    public RubyPropertyAccessor(Type type) {
-        this.type = type;
+    public RubyPropertyAccessor(Property property) {
+        this.type = property.getType();
+        if(property instanceof WithRubyValue) {
+            defaultValue = JavaUtil.convertRubyToJava(((WithRubyValue)property).getRubyValue());
+        }
     }
 
 	private boolean isRubyProxy(Object o) {
@@ -43,6 +48,10 @@ public class RubyPropertyAccessor implements PropertyAccessor {
 	public Getter getGetter(final Class theClass, final String propertyName) throws PropertyNotFoundException {
 		return new Getter() {
 			public Object get(Object owner) throws HibernateException {
+                if(defaultValue != null) {
+                    return defaultValue;
+                }
+
 				Ruby runtime = ((IRubyObject)owner).getRuntime();
                 String name = propertyName.toLowerCase();
                 IRubyObject rubyValue;
@@ -99,6 +108,9 @@ public class RubyPropertyAccessor implements PropertyAccessor {
 
 			public void set(Object target, Object value, SessionFactoryImplementor factory)
 					throws HibernateException {
+                if(defaultValue != null) {
+                    return;
+                }
 				Ruby runtime = ((IRubyObject)target).getRuntime();
 				
                 try {
