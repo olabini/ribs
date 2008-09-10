@@ -1,9 +1,4 @@
 - Think about unit of work
-- Helper to create model objects:
-
-R(Track).define_accessors
-Ribs::define_model :Track
-
 - Ribs should allow advanced functionality such as Unit of Work, Repository, Data Mapper, but also scale down to Active Record level
 - Add logging
 - More than one Ribs definition per model
