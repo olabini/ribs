@@ -1,17 +1,13 @@
 require File.join(File.dirname(__FILE__), 'test_helper')
 
 class IdentityMapAddress
-  Ribs! do |rib|
-    rib.table :address
-  end
+  Ribs! :table => :address 
 end
 
 R(IdentityMapAddress).define_accessors
 
 class IdentityMapPerson
-  Ribs! :identity_map => false do |rib|
-    rib.table :person
-  end
+  Ribs! :identity_map => false, :table => :person
 end
 
 R(IdentityMapPerson).define_accessors

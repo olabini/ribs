@@ -1,7 +1,7 @@
 require File.join(File.dirname(__FILE__), 'test_helper')
 
 Ribs::define_model :Address do |rib|
-  rib.col :zip, :zip_code
+  rib.zip_code :column => :zip
 end
 
 describe "define_model" do 

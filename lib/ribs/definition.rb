@@ -140,13 +140,15 @@ module Ribs
       end
 
       rm.rib = rib
+      rib_data = rib.__column_data__
+      
       
       db = nil
       with_handle(options[:db] || :default) do |h|
         db = h.db
         m = h.meta_data
 
-        name = table_name_for((rib.table || on.name), m)
+        name = table_name_for((options[:table] || on.name), m)
 
         tables = m.get_tables nil, nil, name.to_s, %w(TABLE VIEW ALIAS SYNONYM).to_java(:String)
         if tables.next
@@ -184,16 +186,15 @@ module Ribs
           rm.persistent_class["meatspace"] = options[:from] if options[:from]
           
           table.column_iterator.each do |c|
-            unless rib.to_avoid.include?(c.name.downcase)
+            unless rib_data.to_avoid.include?(c.name.downcase)
               prop = Property.new
               prop.persistent_class = pc
-              prop.name = ((v=rib.columns[c.name.downcase]) && v[0]) || c.name
+              prop.name = ((v=rib_data.columns.find{ |key, val| val[0].to_s.downcase == c.name.downcase}) && v[0]) || c.name
               val = SimpleValue.new(table)
               val.add_column(c)
               val.type_name = get_type_for_sql(c.sql_type, c.sql_type_code)
               prop.value = val
-              
-              if (!rib.primary_keys.empty? && rib.primary_keys[c.name.downcase]) || c.name.downcase == 'id'
+              if (!rib_data.primary_keys.empty? && rib_data.primary_keys.include?(prop.name)) || c.name.downcase == 'id'
                 pc.identifier_property = prop
                 pc.identifier = val
               else
@@ -202,9 +203,9 @@ module Ribs
             else
               if !c.nullable
                 prop = RubyValuedProperty.new
-                prop.ruby_value = rib.default_values[c.name.downcase]
+                prop.ruby_value = rib_data.default_values[c.name.downcase]
                 prop.persistent_class = pc
-                prop.name = ((v=rib.columns[c.name.downcase]) && v[0]) || c.name
+                prop.name = ((v=rib_data.columns[c.name.downcase]) && v[0]) || c.name
                 val = SimpleValue.new(table)
                 val.add_column(c)
                 val.type_name = get_type_for_sql(c.sql_type, c.sql_type_code)
