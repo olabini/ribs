@@ -22,6 +22,7 @@ require 'ribs.jar'
 require 'bigdecimal'
 
 require 'ribs/db'
+require 'ribs/rib'
 require 'ribs/definition'
 require 'ribs/handle'
 require 'ribs/meat'

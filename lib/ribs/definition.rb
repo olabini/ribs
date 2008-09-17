@@ -67,63 +67,6 @@ module Ribs
     end
   end
 
-  # Contains the mapping data that gets created when calling the
-  # {Ribs!} method.
-  class Rib
-    # List of all the columns defined
-    attr_reader :columns
-    # List of all primary keys defined
-    attr_reader :primary_keys
-    # List of all columns to avoid
-    attr_reader :to_avoid
-    # List of default values for columns
-    attr_reader :default_values
-    
-    # Initializes object
-    def initialize
-      @columns = { }
-      @primary_keys = { }
-      @to_avoid = []
-      @default_values = { }
-    end
-    
-    # Gets or sets the table name to work with. If +name+ is nil,
-    # returns the table name, if not sets the table name to +name+.
-    def table(name = nil)
-      if name
-        @table = name
-      else
-        @table
-      end
-    end
-    
-    # Adds a new column mapping for a specific column.
-    def col(column, property = column, options = {})
-      @columns[column.to_s.downcase] = [property.to_s, options]
-    end
-
-    # Adds a new primary key mapping for a column.
-    def primary_key(column, property = column, options = {})
-      @primary_keys[column.to_s.downcase] = property.to_s
-      @columns[column.to_s.downcase] = [property.to_s, options]
-    end
-    
-    # Avoids all the provided columns
-    def avoid(*columns)
-      options = {}
-      if columns.last.kind_of?(Hash)
-        columns, options = columns[0..-2], columns.last
-      end
-      names = columns.map{|s| s.to_s.downcase}
-      @to_avoid += names
-      if options[:default]
-        names.each do |n|
-          @default_values[n] = options[:default]
-        end
-      end
-    end
-  end
-  
   Table = org.hibernate.mapping.Table
   Column = org.hibernate.mapping.Column
   Property = org.hibernate.mapping.Property

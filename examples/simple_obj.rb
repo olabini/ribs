@@ -8,11 +8,11 @@ Ribs::DB.define do |db|
 end
 
 class Blog
-  Ribs!
+#  Ribs!
 end
 
 class Post; end
 Ribs! :on => Post
 
-blogs = Blog.find :all
+blogs = R(Blog).all
 p blogs[0].title
