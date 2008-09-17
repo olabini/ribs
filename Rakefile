@@ -43,7 +43,7 @@ Gem::manage_gems
 specification = Gem::Specification.new do |s|
   s.name   = "ribs"
   s.summary = "Ribs wraps Hibernate, to provide a good ORM for JRuby"
-  s.version = "0.0.1"
+  s.version = "0.0.2"
   s.author = 'Ola Bini'
   s.description = s.summary
   s.homepage = 'http://ribs.rubyforge.org'
