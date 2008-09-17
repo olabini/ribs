@@ -1,11 +1,17 @@
 module Ribs
+  # Keeps track of defined Ribs
   @ribs = {}
 
   class << self
+    # Returns the specific metadata for a combination of model class
+    # and database identifier. If there is no such entry, tries to
+    # find the default entry for the model class.
     def metadata(db, model)
       @ribs[[db, model]] || @ribs[model]
     end
 
+    # Adds metadata for a specific model and an optional database. If
+    # the database is nil, it will add the model as a default metadata
     def add_metadata_for(db, model, metadata)
       if db
         @ribs[[db, model]] = metadata
@@ -14,6 +20,10 @@ module Ribs
       end
     end
     
+    # Tries to find metadata for the model in question and defines new
+    # metadata with define_ribs if no existing metadata exists. This
+    # means that you should do your database definitions before using
+    # the method R for that model.
     def metadata_for(db, model, from)
       if (v = metadata(db, model))
         return v
@@ -37,6 +47,7 @@ module Ribs
     # Should this object be saved in an identity map?
     attr_accessor :identity_map
     
+    # Should this object be saved in an identity map?
     def identity_map?
       self.identity_map
     end
@@ -80,11 +91,13 @@ module Ribs
     # The Ruby class
     attr_accessor :ruby_class
     
+    # Initialize data for this RootClass
     def initialize(*args)
       super
       @data = {}
     end
     
+    # Sets a specific data element
     def []=(key, value)
       @data[key] = value
     end
@@ -95,21 +108,25 @@ module Ribs
       @ruby_class
     end
     
+    # Gets a specific data element
     def getRubyData(key)
       @data[key]
     end
   end
 
+  # A Hibernate Property that can contain a Ruby value too.
   class RubyValuedProperty < org.hibernate.mapping.Property
     include org.jruby.ribs.WithRubyValue
 
     # The Ruby class
     attr_accessor :ruby_value
     
+    # Creation
     def initialize(*args)
       super
     end
     
+    # Implement the interface - return the actual Ruby value
     def getRubyValue
       @ruby_value
     end
@@ -122,6 +139,8 @@ module Ribs
     #
     # +options+ have several possible values:
     # * <tt>:db</tt> - the database to connect this model to
+    #
+    # This method is in urgent need of refactoring.
     #
     def define_ribs(on, options = {})
       rib = Rib.new

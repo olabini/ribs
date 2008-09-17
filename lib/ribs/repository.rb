@@ -43,31 +43,42 @@ module Ribs
   #
   # A Repository is a combination implementation of both Data Mapper and Repository.
   module Repository
+    # The ClassMethods are everything that's available when getting
+    # the repository for a specific model class. It includes most of
+    # the things you'd expect to do on the class itself in
+    # ActiveRecord - stuff like finders, creators and things like
+    # that.
     module ClassMethods
       include Repository
 
+      # Get the meta data for this model
       def metadata
         @metadata
       end
 
+      # Define accessors for this model
       def define_accessors
         self.metadata.properties_and_identity.each do |name, _|
           self.model.send :attr_accessor, name.downcase
         end
       end
       
+      # Makes a specific instance of this class be marked persistent
       def persistent(obj)
         (@persistent ||= {})[obj.object_id] = true
       end
       
+      # Checks if a specific instance is marked as persistent
       def persistent?(obj)
         @persistent && @persistent[obj.object_id]
       end
 
+      # Makes a specific instance of this class be marked destroyed
       def destroyed(obj)
         (@destroyed ||= {})[obj.object_id] = true
       end
       
+      # Checks if a specific instance is marked as destroyed
       def destroyed?(obj)
         @destroyed && @destroyed[obj.object_id]
       end
@@ -113,9 +124,13 @@ module Ribs
       end
     end
     
+    # InstanceMethods are those that become available when you the
+    # repository for a specific instance. This allows things like
+    # saving and destroying a specific instance.
     module InstanceMethods
       include Repository
       
+      # Get the meta data for this model
       def metadata
         self.class.metadata
       end
@@ -143,11 +158,17 @@ module Ribs
         self.model
       end
     end
-    
+
+    # Every repository is tied to a specific database
     attr_reader :database
+    # Every repository is tied to a specific model. This is either a
+    # class or an instance of a class
     attr_reader :model
     
     class << self
+      # Makes sure the class sent in is actually a repostiroy. It
+      # checks all invariants for a Repository and makes them true if
+      # they aren't already.
       def ensure_repository(name, cls, real, db)
         unless cls.kind_of?(Repository)
           mod1 = if Repository.constants.include?(name)
@@ -175,6 +196,7 @@ module Ribs
         end
       end
 
+      # Create a repository for a model inside a database
       def create_repository(name, dbmod)
         c = Class.new
         mod1 = if Repository.constants.include?(name)
@@ -187,6 +209,7 @@ module Ribs
         dbmod.const_set name, c
       end
       
+      # Dynamically create new database modules
       def const_missing(name)
         if /^DB_(.*?)$/ =~ name.to_s
           db_name = $1
