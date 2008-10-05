@@ -25,7 +25,6 @@ require 'ribs/db'
 require 'ribs/rib'
 require 'ribs/definition'
 require 'ribs/handle'
-require 'ribs/meat'
 require 'ribs/repository'
 require 'ribs/core_ext/time'
 

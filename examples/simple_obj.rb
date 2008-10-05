@@ -9,6 +9,7 @@ end
 
 class Blog
 #  Ribs!
+  attr_accessor :title
 end
 
 class Post; end

@@ -7,11 +7,11 @@ Ribs::DB.define do |db|
   db.driver = 'org.apache.derby.jdbc.EmbeddedDriver'
 end
 
-Ribs::with_session do |s|
-  s.ddl "DROP TABLE blog" rescue nil
-  s.ddl "DROP TABLE post" rescue nil
+Ribs::with_handle do |h|
+  h.ddl "DROP TABLE blog" rescue nil
+  h.ddl "DROP TABLE post" rescue nil
 
-  s.ddl <<SQL
+  h.ddl <<SQL
 CREATE TABLE blog (
   id INT NOT NULL,
   title VARCHAR(255) NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE blog (
 )
 SQL
 
-  s.ddl <<SQL
+  h.ddl <<SQL
 CREATE TABLE post (
   id INT NOT NULL,
   title VARCHAR(255) NOT NULL,
@@ -32,10 +32,10 @@ SQL
 INSERT INTO blog(id, title) VALUES(?, ?)
 SQL
   
-  s.insert("INSERT INTO blog(id, title) VALUES(?, ?)", 
+  h.insert("INSERT INTO blog(id, title) VALUES(?, ?)", 
            [1, "foobar"], 
            [2, "flux"])
-  s.insert("INSERT INTO post(id, title, blog_id) VALUES(?, ?, ?)", 
+  h.insert("INSERT INTO post(id, title, blog_id) VALUES(?, ?, ?)", 
            [1, "one", 1], 
            [2, "two", 1],
            [3, "three", 2])
