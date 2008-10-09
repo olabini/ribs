@@ -33,6 +33,18 @@ module Ribs
              end
         db.handle
       end
+
+      def get_simple(from = :default)
+        db = case from
+             when :default
+               Ribs::DB::get
+             when Ribs::DB
+               from
+             else
+               Ribs::DB::get(from)
+             end
+        db.simple_handle
+      end
     end
     
     # The current database for this handle
@@ -56,6 +68,12 @@ module Ribs
       @db.release(self)
     end
 
+    def simple_release
+      chk_conn
+      @connected = false
+      @db.simple_release(self)
+    end
+    
     # LOW LEVEL - shouldn't be used except by Ribs
     def hibernate_session # :nodoc:
       @hibernate_session

@@ -5,7 +5,7 @@ class Owner
 end
 
 class Blog
-  attr_accessor :owner, :name
+  attr_accessor :id, :owner, :name
 
   Ribs! do |blog|
     blog.belongs_to Owner

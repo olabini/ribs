@@ -11,6 +11,7 @@ module Ribs
   # Ribs::Repository::FooBar::ClassMethods so you can add behavior to
   # these that map over all databases.
   def self.Repository(obj, db = :default)
+    Ribs.execute_delayed_ribs!
     db_name = "DB_#{db}"
     model_type = case obj
           when Class

@@ -80,10 +80,27 @@ module Ribs
         simple_name = args.first.to_s
         name = simple_name.gsub(/([[:lower:]][0-9]*)([[:upper:]]+)/, '\1_\2').downcase
 
-        opts = {:column => "#{name}_id"}.merge(opts)
+        opts = {:column => "#{name}_id",
+                :name => name}.merge(opts)
 
         @columns[name] = [opts[:column].to_s, opts, :belongs_to]
-        @associations[:belongs_to][opts[:column]] = [name, simple_name, opts[:column], opts]
+        @associations[:belongs_to][opts[:column]] = [opts[:name].to_s, simple_name, opts[:column], opts]
+      end
+    end
+
+    def has_one(*args)
+      if args==[] || args.first.is_a?(Hash) || [:primary_key, :avoid, :default].include?(args.first)
+        method_missing(:has_one, *args)
+      else
+        opts = args.grep(Hash).first || {}
+        simple_name = args.first.to_s
+        name = simple_name.gsub(/([[:lower:]][0-9]*)([[:upper:]]+)/, '\1_\2').downcase
+
+        opts = {:column => "#{name}_id",
+                :name => name}.merge(opts)
+
+        @columns[name] = [opts[:column].to_s, opts, :has_one]
+        @associations[:has_one][opts[:column]] = [opts[:name].to_s, simple_name, opts[:column], opts]
       end
     end
     

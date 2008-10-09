@@ -83,6 +83,7 @@ module Ribs
   Property = org.hibernate.mapping.Property
   SimpleValue = org.hibernate.mapping.SimpleValue
   ManyToOne = org.hibernate.mapping.ManyToOne
+  OneToOne = org.hibernate.mapping.OneToOne
 
   # A simple helper class that allows the Java parts of the system to
   # get the Ruby class from the PersistentClass instance.
@@ -138,6 +139,37 @@ module Ribs
       R(eval(name), db || :default)
     end
 
+    def define_delayed_ribs(on, options = {}, &block)
+      unless options[:metadata]
+        options[:metadata] = Ribs::MetaData.new      
+      end
+
+      rm = options[:metadata]
+      Ribs::add_metadata_for(options[:db], on, rm)
+      rm.identity_map = options.key?(:identity_map) ? options[:identity_map] : true
+
+      with_simple_handle(options[:db] || :default) do |h|
+        db = h.db
+        m = h.meta_data
+
+        name = table_name_for((options[:table] || on.name), m)
+
+        tables = m.get_tables nil, nil, name.to_s, %w(TABLE VIEW ALIAS SYNONYM).to_java(:String)
+        if tables.next
+          rm.table = Table.new(tables.get_string(3))
+        end
+      end
+      
+      (@delayed ||= []) << [on, options, block]
+    end
+
+    def execute_delayed_ribs!
+      delayed, @delayed = @delayed, []
+      (delayed && delayed.each do |v|
+        define_ribs(v[0], v[1], &v[2])
+      end)
+    end
+    
     # Define a rib for the class +on+. If a block is given, will first
     # yield an instance of Rib to it and then base the mapping
     # definition on that.
@@ -150,14 +182,8 @@ module Ribs
     def define_ribs(on, options = {})
       rib = Rib.new
       yield rib if block_given?
-       
-      unless options[:metadata]
-        options[:metadata] = Ribs::MetaData.new      
-      end
-
+      
       rm = options[:metadata]
-      Ribs::add_metadata_for(options[:db], on, rm)
-      rm.identity_map = options.key?(:identity_map) ? options[:identity_map] : true
 
       unless options[:from]
         options[:from] = R(on, options[:db] || :default)
@@ -167,7 +193,7 @@ module Ribs
       rib_data = rib.__column_data__
       
       db = nil
-      with_handle(options[:db] || :default) do |h|
+      with_simple_handle(options[:db] || :default) do |h|
         db = h.db
         m = h.meta_data
 
@@ -176,7 +202,6 @@ module Ribs
         tables = m.get_tables nil, nil, name.to_s, %w(TABLE VIEW ALIAS SYNONYM).to_java(:String)
         if tables.next
           table = Table.new(tables.get_string(3))
-          rm.table = table
           c = tables.get_string(1)
           table.catalog = c if c && c.length > 0
           c = tables.get_string(2)
@@ -248,6 +273,20 @@ module Ribs
             val = ManyToOne.new(table)
             val.add_column(table.get_column(Column.new(col_name)))
             ensure_valid_entity_name(options[:db], definition[1])
+            val.referenced_entity_name = definition[1]
+            prop.value = val
+            pc.add_property(prop)
+          end
+
+          rib_data.associations[:has_one].each do |col_name, definition|
+            prop = Property.new
+            prop.persistent_class = pc
+            prop.name = definition[0]
+
+            val = OneToOne.new(table, pc)
+#            val.add_column(table.get_column(Column.new(col_name)))
+
+            ensure_valid_entity_name(options[:db], definition[1]).metadata
             val.referenced_entity_name = definition[1]
             prop.value = val
             pc.add_property(prop)

@@ -126,6 +126,9 @@ module Ribs
     def initialize(name = :main)
       self.name = name
       self.properties = {}
+      class << self
+        alias session_factory session_factory_create
+      end
     end
     
     # Is this database the default?
@@ -148,13 +151,32 @@ module Ribs
       @configuration = Configuration.new.add_properties(properties)
       @configuration.set_interceptor org.jruby.ribs.RubyInterceptor.new(self, (self.default? ? :default : self.name).to_s)
       @mappings = @configuration.create_mappings
+      @simple_configuration = Configuration.new.add_properties(properties)
+      @simple_session_factory = @simple_configuration.build_session_factory
       reset_session_factory!
     end
 
     # Resets the session factory. This is necessary after some
     # configuration changes have happened.
     def reset_session_factory!
+      if @session_factory
+        @session_factory = nil
+        class << self
+          alias session_factory session_factory_create
+        end
+      end
+    end
+    
+    def session_factory_create
       @session_factory = @configuration.build_session_factory
+      class << self
+        alias session_factory session_factory_return
+      end
+      @session_factory
+    end
+
+    def session_factory_return
+      @session_factory
     end
     
     # Fetch a new Ribs handle connected to the this database. Returns
@@ -165,7 +187,21 @@ module Ribs
         curr[1] += 1 #reference count
         Handle.new(self, curr[0])
       else
-        sess = @session_factory.open_session
+        sess = self.session_factory.open_session
+        sessions[self.object_id] = [sess,1]
+        Handle.new(self, sess)
+      end
+    end
+
+    # Fetch a new simple Ribs handle connected to the this database. Returns
+    # a Ribs::Handle object.
+    def simple_handle
+      sessions = (Thread.current[:ribs_db_simple_sessions] ||= {})
+      if curr = sessions[self.object_id]
+        curr[1] += 1 #reference count
+        Handle.new(self, curr[0])
+      else
+        sess = @simple_session_factory.open_session
         sessions[self.object_id] = [sess,1]
         Handle.new(self, sess)
       end
@@ -181,6 +217,20 @@ module Ribs
         if res[1] == 0
           res[0].close
           Thread.current[:ribs_db_sessions].delete(self.object_id)
+        end
+      end
+    end
+
+    # Release a simple Ribs::Handle object that is connected to this
+    # database. That Handle object should not be used after this
+    # method has been invoked.
+    def simple_release(handle)
+      res = Thread.current[:ribs_db_simple_sessions][self.object_id]
+      if res[0] == handle.hibernate_session
+        res[1] -= 1
+        if res[1] == 0
+          res[0].close
+          Thread.current[:ribs_db_simple_sessions].delete(self.object_id)
         end
       end
     end

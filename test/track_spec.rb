@@ -32,6 +32,8 @@ end
 
 # R(Track).define_accessors
 
+R(Track)
+
 describe Track do 
   it "should be able to find things based on mapped primary key" do
     track = R(Track).get(2)

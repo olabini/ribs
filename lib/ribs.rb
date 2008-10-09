@@ -49,9 +49,16 @@ module Ribs
       h = Ribs::Handle.get(from)
       yield h
     ensure
-      h.release
+      h.release if h
     end
 
+    def with_simple_handle(from = :default)
+      h = Ribs::Handle.get_simple(from)
+      yield h
+    ensure
+      h.simple_release if h
+    end
+    
     # Defines a model with the given name, defining attribute
     # accessors and also providing the Ribs mapping from the block
     def define_model(name, options = {}, &block)
@@ -93,6 +100,6 @@ module Kernel
   def Ribs!(user_options = {}, &block)
     default_options = {:on => self, :db => :default, :from => nil}
     options = default_options.merge user_options
-    Ribs::define_ribs(options[:on], options, &block)
+    Ribs::define_delayed_ribs(options[:on], options, &block)
   end
 end
