@@ -111,6 +111,12 @@ module Ribs
       chk_conn
       execute(string)
     end
+
+    # LOW LEVEL - shouldn't be used except by Ribs
+    def delete_sql(string) # :nodoc:
+      chk_conn
+      execute(string)
+    end
     
     # LOW LEVEL - shouldn't be used except by Ribs
     def insert(template, *data) # :nodoc:

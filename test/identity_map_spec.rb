@@ -45,7 +45,6 @@ describe "Identity map" do
     end
     
     it "should return same objects with get" do 
-      p [:BLARG, @@id]
       R(IdentityMapAddress).get(@@id).should == R(IdentityMapAddress).get(@@id)
     end
     it "should return same objects with all" do 

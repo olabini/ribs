@@ -14,6 +14,7 @@ class Time
   end
 end
 
+
 Ribs::DB.define do |db|
   # It's also possible to configure through JNDI here
   
@@ -36,49 +37,42 @@ Ribs::DB.define(:flurg) do |db|
   db.driver = 'org.apache.derby.jdbc.EmbeddedDriver'
 end
 
+def delete_or_create(h, name, sql)
+  begin
+    h.delete_sql("DELETE FROM #{name}")
+  rescue
+    h.ddl <<SQL
+CREATE TABLE #{name} (
+#{sql}
+)
+SQL
+  end
+end
+
+def fakemodels(h)
+  delete_or_create(h, "FAKEMODEL",<<SQL)
+  ID INT NOT NULL
+SQL
+
+  delete_or_create(h, "FAKEMODEL_FAKESECONDMODEL",<<SQL)
+  ID INT NOT NULL
+SQL
+end
+
 def reset_database!
   Ribs.with_handle(:flarg) do |h|
-    h.ddl "DROP TABLE FAKEMODEL" rescue nil
-    h.ddl "DROP TABLE FAKEMODEL_FAKESECONDMODEL" rescue nil
-    h.ddl <<SQL
-CREATE TABLE FAKEMODEL (
-  ID INT NOT NULL
-)
-SQL
-    h.ddl <<SQL
-CREATE TABLE FAKEMODEL_FAKESECONDMODEL (
-  ID INT NOT NULL
-)
-SQL
+    fakemodels(h)
   end
 
   Ribs.with_handle(:flurg) do |h|
-    h.ddl "DROP TABLE FAKEMODEL" rescue nil
-    h.ddl "DROP TABLE FAKEMODEL_FAKESECONDMODEL" rescue nil
-    h.ddl <<SQL
-CREATE TABLE FAKEMODEL (
-  ID INT NOT NULL
-)
-SQL
-    h.ddl <<SQL
-CREATE TABLE FAKEMODEL_FAKESECONDMODEL (
-  ID INT NOT NULL
-)
-SQL
+    fakemodels(h)
   end
 
   Ribs.with_handle do |h|
-    h.ddl "DROP TABLE DB_TRACK" rescue nil
-    h.ddl "DROP TABLE ARTIST" rescue nil
-    h.ddl "DROP TABLE person" rescue nil
-    h.ddl "DROP TABLE address" rescue nil
-    h.ddl "DROP TABLE FAKEMODEL" rescue nil
-    h.ddl "DROP TABLE FAKEMODEL_FAKESECONDMODEL" rescue nil
-
+    fakemodels(h)
+    
     # GENERATED ALWAYS AS IDENTITY
-    # Add new columns for TIMESTAMP, BINARY, DECIMAL, FLOAT, BOOLEAN
-    h.ddl <<SQL
-CREATE TABLE DB_TRACK (
+    delete_or_create(h, "DB_TRACK",<<SQL)
   TRACK_ID INT NOT NULL,
   title VARCHAR(255) NOT NULL,
   filePath VARCHAR(255) NOT NULL,
@@ -93,49 +87,31 @@ CREATE TABLE DB_TRACK (
   good SMALLINT,
   price DECIMAL(10,2),
   PRIMARY KEY (TRACK_ID)
-)
 SQL
 
-    h.ddl <<SQL
-CREATE TABLE ARTIST (
+    delete_or_create(h, "ARTIST",<<SQL)
   ID INT NOT NULL,
   name VARCHAR(255) NOT NULL,
   PRIMARY KEY (ID)
-)
 SQL
 
-    h.ddl <<SQL
-CREATE TABLE person (
+    delete_or_create(h, "person",<<SQL)
   ID INT NOT NULL,
   given_name VARCHAR(255),
   sur_name VARCHAR(255) NOT NULL,
   age INT NOT NULL,
   PRIMARY KEY (ID)
-)
 SQL
 
-    h.ddl <<SQL
-CREATE TABLE address (
+    delete_or_create(h, "address",<<SQL)
   ID INT NOT NULL,
   street VARCHAR(255),
   postal VARCHAR(255),
   zip VARCHAR(255),
   country VARCHAR(255),
   PRIMARY KEY (ID)
-)
 SQL
-    
-    h.ddl <<SQL
-CREATE TABLE FAKEMODEL (
-  ID INT NOT NULL
-)
-SQL
-    h.ddl <<SQL
-CREATE TABLE FAKEMODEL_FAKESECONDMODEL (
-  ID INT NOT NULL
-)
-SQL
-    
+
     template = <<SQL
 INSERT INTO DB_TRACK(TRACK_ID, title, filePath, playTime, added, volume, lastPlayed, data, description, fraction, otherFraction, good, price) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 SQL
