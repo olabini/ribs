@@ -4,7 +4,7 @@ describe Ribs::Rib do
   it "should not have any methods defined except for method_missing" do 
     Ribs::Rib.instance_methods.sort.should == 
       %w(Ribs! __send__ __id__ rspec_reset 
-         rspec_verify should_receive 
+         rspec_verify should_receive belongs_to
          should_not_receive R received_message? 
          stub! __column_data__ method_missing).sort
   end

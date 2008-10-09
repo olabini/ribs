@@ -13,20 +13,20 @@ class Track
   attr_accessor :full_price
   attr_accessor :volume
 
-  Ribs! :table => :DB_TRACK, :identity_map => false do |rib|
-    rib.TRACK_ID.primary_key!
+  Ribs! :table => :DB_TRACK, :identity_map => false do |track|
+    track.TRACK_ID.primary_key!
 
-    rib.track_title    :column => :title
-    rib.time           :column => :playTime
-    rib.date_added     :column => :added
-    rib.last_played_at :column => :lastPlayed
-    rib.file_data      :column => :data
-    rib.desc           :column => :description
-    rib.some_fraction  :column => :fraction
-    rib.is_good        :column => :good
-    rib.full_price     :column => :price
+    track.track_title    :column => :title
+    track.time           :column => :playTime
+    track.date_added     :column => :added
+    track.last_played_at :column => :lastPlayed
+    track.file_data      :column => :data
+    track.desc           :column => :description
+    track.some_fraction  :column => :fraction
+    track.is_good        :column => :good
+    track.full_price     :column => :price
 
-    rib.filePath :avoid, :default => "fluxie"
+    track.filePath :avoid, :default => "fluxie"
   end
 end
 

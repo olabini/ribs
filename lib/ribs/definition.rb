@@ -82,6 +82,7 @@ module Ribs
   Column = org.hibernate.mapping.Column
   Property = org.hibernate.mapping.Property
   SimpleValue = org.hibernate.mapping.SimpleValue
+  ManyToOne = org.hibernate.mapping.ManyToOne
 
   # A simple helper class that allows the Java parts of the system to
   # get the Ruby class from the PersistentClass instance.
@@ -133,6 +134,10 @@ module Ribs
   end
   
   class << self
+    def ensure_valid_entity_name(db, name)
+      R(eval(name), db || :default)
+    end
+
     # Define a rib for the class +on+. If a block is given, will first
     # yield an instance of Rib to it and then base the mapping
     # definition on that.
@@ -160,7 +165,6 @@ module Ribs
 
       rm.rib = rib
       rib_data = rib.__column_data__
-      
       
       db = nil
       with_handle(options[:db] || :default) do |h|
@@ -206,18 +210,21 @@ module Ribs
           
           table.column_iterator.each do |c|
             unless rib_data.to_avoid.include?(c.name.downcase)
-              prop = Property.new
-              prop.persistent_class = pc
-              prop.name = ((v=rib_data.columns.find{ |key, val| val[0].to_s.downcase == c.name.downcase}) && v[0]) || c.name
-              val = SimpleValue.new(table)
-              val.add_column(c)
-              val.type_name = get_type_for_sql(c.sql_type, c.sql_type_code)
-              prop.value = val
-              if (!rib_data.primary_keys.empty? && rib_data.primary_keys.include?(prop.name)) || c.name.downcase == 'id'
-                pc.identifier_property = prop
-                pc.identifier = val
-              else
-                pc.add_property(prop)
+              col_data = rib_data.columns.find{ |key, val| val[0].to_s.downcase == c.name.downcase} || [c.name, {}]
+              unless col_data[1].length == 3 # It's an association
+                prop = Property.new
+                prop.persistent_class = pc
+                prop.name = col_data[0]
+                val = SimpleValue.new(table)
+                val.add_column(c)
+                val.type_name = get_type_for_sql(c.sql_type, c.sql_type_code)
+                prop.value = val
+                if (!rib_data.primary_keys.empty? && rib_data.primary_keys.include?(prop.name)) || c.name.downcase == 'id'
+                  pc.identifier_property = prop
+                  pc.identifier = val
+                else
+                  pc.add_property(prop)
+                end
               end
             else
               if !c.nullable
@@ -233,6 +240,19 @@ module Ribs
               end
             end
           end
+
+          rib_data.associations[:belongs_to].each do |col_name, definition|
+            prop = Property.new
+            prop.persistent_class = pc
+            prop.name = definition[0]
+            val = ManyToOne.new(table)
+            val.add_column(table.get_column(Column.new(col_name)))
+            ensure_valid_entity_name(options[:db], definition[1])
+            val.referenced_entity_name = definition[1]
+            prop.value = val
+            pc.add_property(prop)
+          end
+          
           pc.create_primary_key
           db.mappings.add_class(pc)
         else

@@ -38,9 +38,12 @@ module Ribs
       # List of default values for columns
       attr_reader :default_values
 
+      attr_reader :associations
+
       # Sets all values
-      def initialize(columns, primary_keys, to_avoid, default_values)
-        @columns, @primary_keys, @to_avoid, @default_values = columns, primary_keys, to_avoid, default_values
+      def initialize(columns, primary_keys, to_avoid, default_values, associations)
+        @columns, @primary_keys, @to_avoid, @default_values, @associations = 
+          columns, primary_keys, to_avoid, default_values, associations
       end
     end
 
@@ -55,14 +58,35 @@ module Ribs
       @primary_keys = []
       @to_avoid = []
       @default_values = { }
+      @associations = 
+        {
+        :belongs_to => { },
+        :has_one    => { },
+        :has_n      => { }
+        }
     end
     
     # Returns a reference object that allow access to the resulting
     # data objects
     def __column_data__
-      ColumnData.new(@columns, @primary_keys, @to_avoid, @default_values)
+      ColumnData.new(@columns, @primary_keys, @to_avoid, @default_values, @associations)
     end
 
+    def belongs_to(*args)
+      if args==[] || args.first.is_a?(Hash) || [:primary_key, :avoid, :default].include?(args.first)
+        method_missing(:belongs_to, *args)
+      else
+        opts = args.grep(Hash).first || {}
+        simple_name = args.first.to_s
+        name = simple_name.gsub(/([[:lower:]][0-9]*)([[:upper:]]+)/, '\1_\2').downcase
+
+        opts = {:column => "#{name}_id"}.merge(opts)
+
+        @columns[name] = [opts[:column].to_s, opts, :belongs_to]
+        @associations[:belongs_to][opts[:column]] = [name, simple_name, opts[:column], opts]
+      end
+    end
+    
     # Handles property names. The only ones that aren't possibly to
     # use is "initialize", "__column_data__", "__id__",
     # "method_missing" and "__send__". Everything else is

@@ -112,6 +112,20 @@ SQL
   PRIMARY KEY (ID)
 SQL
 
+    delete_or_create(h, "blog",<<SQL)
+  ID INT NOT NULL,
+  name VARCHAR(255),
+  owner_id INT NOT NULL,
+  PRIMARY KEY (ID)
+SQL
+
+    delete_or_create(h, "owner",<<SQL)
+  ID INT NOT NULL,
+  name VARCHAR(255),
+  blog_id INT NOT NULL,
+  PRIMARY KEY (ID)
+SQL
+    
     template = <<SQL
 INSERT INTO DB_TRACK(TRACK_ID, title, filePath, playTime, added, volume, lastPlayed, data, description, fraction, otherFraction, good, price) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 SQL
@@ -126,6 +140,14 @@ SQL
              [1, "Public Image Ltd"],
              [2, "New Model Army"],
              [3, "David Bowie"])
+
+    h.insert("INSERT INTO blog(ID, name, owner_id) VALUES(?, ?, ?)", 
+             [1, "One", 1],
+             [2, "Two", 2])
+
+    h.insert("INSERT INTO owner(ID, name, blog_id) VALUES(?, ?, ?)", 
+             [1, "Foo", 2],
+             [2, "Bar", 1])
   end
 end
 
