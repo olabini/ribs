@@ -38,8 +38,6 @@ Rake::RDocTask.new do |task|
   task.rdoc_files.include('README', 'lib/**/*.rb')
 end
 
-Gem::manage_gems
-
 specification = Gem::Specification.new do |s|
   s.name   = "ribs"
   s.summary = "Ribs wraps Hibernate, to provide a good ORM for JRuby"
